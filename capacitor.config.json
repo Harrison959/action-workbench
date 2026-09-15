@@ -1,6 +1,6 @@
 {
   "appId": "com.yhs.action",
-  "appName": "action",
+  "appName": "小松工作台",
   "webDir": "dist",
   "backgroundColor": "#ECEDE8",
   "android": { "allowMixedContent": false },

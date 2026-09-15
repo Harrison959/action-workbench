@@ -1,4 +1,4 @@
-# action · Personal Workbench
+# 小松工作台 · Personal Workbench
 
 一个给自己使用的行动与成长工作台。桌面网页和 Android 应用共用这一套 React 界面、数据模型和 Supabase 同步层。
 

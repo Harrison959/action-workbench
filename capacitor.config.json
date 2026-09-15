@@ -1,0 +1,8 @@
+{
+  "appId": "com.yhs.action",
+  "appName": "action",
+  "webDir": "dist",
+  "backgroundColor": "#ECEDE8",
+  "android": { "allowMixedContent": false },
+  "plugins": { "LocalNotifications": { "iconColor": "#355447", "smallIcon": "ic_stat_action" } }
+}

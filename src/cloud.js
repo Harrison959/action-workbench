@@ -5,7 +5,7 @@ let syncStatus='仅保存在本机';
 const listeners=new Set();
 const status=s=>{syncStatus=s;listeners.forEach(fn=>fn(s));};
 export const watchSync=fn=>{listeners.add(fn);fn(syncStatus);return()=>listeners.delete(fn);};
-export function configuration(){try{return JSON.parse(localStorage.getItem('action-cloud')||'null')||{url:import.meta.env.VITE_SUPABASE_URL||'',key:import.meta.env.VITE_SUPABASE_ANON_KEY||''};}catch{return {url:'',key:''};}}
+export function configuration(){try{return JSON.parse(localStorage.getItem('action-cloud')||'null')||{url:import.meta.env.VITE_SUPABASE_URL||'',key:import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||import.meta.env.VITE_SUPABASE_ANON_KEY||''};}catch{return {url:'',key:''};}}
 export function configure(url,key){
  const parsed=new URL(url);if(parsed.protocol!=='https:'||!parsed.hostname.endsWith('.supabase.co'))throw new Error('请填写 Supabase 项目的 https://xxx.supabase.co 地址');
  if(key.startsWith('sb_secret_'))throw new Error('不能在应用中使用 secret key，请使用 Publishable key');

@@ -1,0 +1,196 @@
+.today-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.today-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.today-head h1 {
+  font-size: 26px;
+  margin: 0;
+}
+.today-head time,
+.today-reason,
+.today-action-meta,
+.today-empty {
+  color: var(--muted);
+  font-size: 13px;
+}
+.today-next {
+  border-left: 3px solid var(--green);
+  padding: 4px 0 6px 18px;
+  margin-bottom: 22px;
+}
+.today-page h2 {
+  font-size: 16px;
+  margin: 0;
+  font-weight: 600;
+}
+.today-reason {
+  margin: 8px 0 5px;
+}
+.today-action-title {
+  display: block;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 26px;
+  font-weight: 600;
+  text-align: left;
+  padding: 0;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.today-action-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 16px;
+  margin: 10px 0 14px;
+}
+.today-action-meta a {
+  color: var(--green);
+}
+.today-section {
+  border-top: 1px solid var(--line);
+  padding: 16px 0;
+}
+.today-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.today-section-head a,
+.today-all-tasks,
+.today-empty-actions a,
+.today-progress a {
+  font-size: 13px;
+  color: var(--green);
+}
+.today-empty {
+  margin: 12px 0;
+  line-height: 1.6;
+}
+.today-empty-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.today-top .task-row {
+  min-height: 62px;
+  padding: 10px 0;
+  gap: 12px;
+}
+.today-top .task-row-content {
+  min-width: 0;
+}
+.today-top .task-text strong {
+  overflow-wrap: anywhere;
+}
+.today-top .task-project {
+  overflow-wrap: anywhere;
+}
+.today-task-number {
+  width: 16px;
+  flex-shrink: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.today-top .check {
+  flex-shrink: 0;
+}
+.today-all-tasks {
+  display: inline-block;
+  margin-top: 8px;
+}
+.today-timeline {
+  padding: 0;
+  margin: 10px 0 0;
+  list-style: none;
+}
+.today-timeline li {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 9px 0;
+}
+.today-timeline time {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.today-timeline button {
+  text-align: left;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.today-timeline li > span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.today-capture {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.today-capture input {
+  flex: 1;
+  min-width: 0;
+  width: 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--text);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 14px;
+}
+.today-capture button {
+  flex-shrink: 0;
+}
+.today-progress {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding: 14px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.today-progress strong {
+  color: var(--text);
+  margin-left: 8px;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 700px) {
+  .today-head {
+    margin-bottom: 16px;
+  }
+  .today-head h1 {
+    font-size: 23px;
+  }
+  .today-action-title {
+    font-size: 23px;
+  }
+  .today-next {
+    padding-left: 12px;
+    margin-bottom: 18px;
+  }
+  .today-top .task-row {
+    gap: 8px;
+  }
+  .today-section {
+    padding: 14px 0;
+  }
+}

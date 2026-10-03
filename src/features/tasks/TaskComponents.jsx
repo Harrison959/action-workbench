@@ -89,6 +89,7 @@ export function taskEditor(app, row = {}) {
       if (!v.title?.trim()) throw new Error("请填写任务内容");
       if (
         v.top &&
+        !(row.top && row.date === v.date && row.status !== "cancelled") &&
         app
           .list("task")
           .filter(
@@ -117,7 +118,13 @@ export function taskEditor(app, row = {}) {
     },
   });
 }
-export function TaskRow({ task, number, compact = false, showProject = true }) {
+export function TaskRow({
+  task,
+  number,
+  compact = false,
+  showProject = true,
+  variant,
+}) {
   const a = useApp(),
     [busy, setBusy] = useState(false);
   const project = a.list("project").find((p) => p.id === task.projectId);
@@ -136,6 +143,9 @@ export function TaskRow({ task, number, compact = false, showProject = true }) {
       className={"task-row " + (task.status === "done" ? "done" : "")}
       data-task-id={task.id}
     >
+      {variant === "today" && (
+        <span className="today-task-number">{number}</span>
+      )}
       <button
         className="check"
         disabled={busy || task.status === "cancelled"}
@@ -158,7 +168,7 @@ export function TaskRow({ task, number, compact = false, showProject = true }) {
       >
         {task.status === "done" ? (
           <Icon name="Check" size={16} />
-        ) : number ? (
+        ) : number && variant !== "today" ? (
           <span>{number}</span>
         ) : null}
       </button>
@@ -166,12 +176,17 @@ export function TaskRow({ task, number, compact = false, showProject = true }) {
         <button className="task-text" onClick={() => taskEditor(a, task)}>
           <strong>{task.title}</strong>
           <span>
-            <i className={"priority " + (task.priority || "P2")}>
-              {task.priority || "P2"}
-            </i>
-            {STREAMS.find((s) => s.id === task.stream)?.name || "个人"}
-            <b>·</b>
+            {variant !== "today" && (
+              <>
+                <i className={"priority " + (task.priority || "P2")}>
+                  {task.priority || "P2"}
+                </i>
+                {STREAMS.find((s) => s.id === task.stream)?.name || "个人"}
+                <b>·</b>
+              </>
+            )}
             {task.minutes || 25} 分钟
+            {variant === "today" && task.status === "done" && " · 已完成"}
             {task.date && task.date !== today() && <> · {task.date}</>}
             {task.status === "cancelled" && " · 已取消"}
           </span>

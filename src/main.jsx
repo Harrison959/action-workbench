@@ -1,3 +1,4 @@
+import { Projects } from "./features/projects/Projects";
 import React, { useState, useEffect, useCallback } from "react";
 import { createRoot } from "react-dom/client";
 import * as db from "./db";
@@ -33,12 +34,12 @@ import {
   MobileNavigation,
   AddMenu,
 } from "./components/AppNavigation";
-import { Data, More, ProjectsEntry } from "./pages/NavigationPages";
+import { Data, More } from "./pages/NavigationPages";
 import "./styles.css";
 import "./v2.css";
 const pageMap = {
   today: Today,
-  projects: ProjectsEntry,
+  projects: Projects,
   calendar: Schedule,
   review: Summary,
   data: Data,

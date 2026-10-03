@@ -1,4 +1,4 @@
-import React, { useEffect, useState, lazy, Suspense } from "react";
+import React, { useEffect, useState } from "react";
 import {
   useApp,
   Icon,
@@ -16,161 +16,11 @@ import {
   noteField as note,
 } from "../ui";
 import { STREAMS, today, addDays, money, sum, elapsedFocus } from "../domain";
-const Sculpture = lazy(() => import("../sculpture"));
-export function taskEditor(app, row = {}) {
-  app.edit({
-    key: "task:" + (row.id || "new"),
-    title: row.id ? "任务详情" : "把下一步写清楚",
-    initial: {
-      date: today(),
-      priority: "P2",
-      stream: "",
-      minutes: 25,
-      status: "open",
-      top: false,
-      ...row,
-    },
-    fields: [
-      f("title", "具体做什么", {
-        required: true,
-        wide: true,
-        placeholder: "例如：跟进昨天约好的两位客户",
-      }),
-      d(),
-      f("priority", "优先级", {
-        type: "select",
-        options: [
-          { value: "P1", label: "P1 · 必须完成" },
-          { value: "P2", label: "P2 · 重要" },
-          { value: "P3", label: "P3 · 普通" },
-          { value: "P4", label: "P4 · 可选" },
-        ],
-      }),
-      f("stream", "所属主线", {
-        type: "select",
-        options: [
-          { value: "", label: "暂不归类" },
-          ...STREAMS.map((s) => ({ value: s.id, label: s.name })),
-        ],
-      }),
-      n("minutes", "预估分钟", { min: 1, max: 600, required: true }),
-      f("goalId", "关联目标", {
-        type: "select",
-        options: [
-          { value: "", label: "暂不关联" },
-          ...app.list("goal").map((g) => ({ value: g.id, label: g.title })),
-        ],
-      }),
-      f("status", "状态", {
-        type: "select",
-        options: [
-          { value: "open", label: "待完成" },
-          { value: "done", label: "已完成" },
-          { value: "cancelled", label: "已取消" },
-        ],
-      }),
-      f("top", "放入当天 Top 3", { type: "checkbox" }),
-      note("subtasksText", "子任务（每行一项）"),
-      note("note", "备注 / 完成结果 / 改期原因"),
-    ],
-    save: async (v) => {
-      if (
-        v.top &&
-        app
-          .list("task")
-          .filter(
-            (t) =>
-              t.date === v.date &&
-              t.top &&
-              t.id !== row.id &&
-              t.status !== "cancelled",
-          ).length >= 3
-      )
-        throw new Error("当天最多选择3项重点，请先调整已有重点");
-      await app.save(
-        "task",
-        {
-          ...v,
-          title: v.title.trim(),
-          minutes: Number(v.minutes),
-          completedAt:
-            v.status === "done"
-              ? row.completedAt || new Date().toISOString()
-              : null,
-        },
-        row.id,
-      );
-      app.notify("任务已保存");
-    },
-  });
-}
-export function TaskRow({ task, number, compact = false }) {
-  const a = useApp();
-  return (
-    <div className={"task-row " + (task.status === "done" ? "done" : "")}>
-      <button
-        className="check"
-        aria-label={task.status === "done" ? "撤销完成" : "完成任务"}
-        aria-pressed={task.status === "done"}
-        onClick={() =>
-          a.save(
-            "task",
-            {
-              ...task,
-              status: task.status === "done" ? "open" : "done",
-              completedAt:
-                task.status === "done" ? null : new Date().toISOString(),
-            },
-            task.id,
-          )
-        }
-      >
-        {task.status === "done" ? (
-          <Icon name="Check" size={16} />
-        ) : number ? (
-          <span>{number}</span>
-        ) : null}
-      </button>
-      <button className="task-text" onClick={() => taskEditor(a, task)}>
-        <strong>{task.title}</strong>
-        <span>
-          <i className={"priority " + task.priority}>{task.priority}</i>
-          {STREAMS.find((s) => s.id === task.stream)?.name || "个人"}
-          <b>·</b>
-          {task.minutes || 25} 分钟
-          {task.date !== today() && <> · {task.date}</>}
-        </span>
-      </button>
-      {!compact && task.status === "open" && (
-        <button
-          className="icon-button"
-          aria-label="开始专注"
-          onClick={async () => {
-            const active = a.list("focus")[0];
-            if (active?.running && active.taskId !== task.id) {
-              a.notify("请先暂停当前专注，再切换任务");
-              location.hash = "focus";
-              return;
-            }
-            await a.save(
-              "focus",
-              {
-                taskId: task.id,
-                elapsed: 0,
-                minutes: task.minutes || 25,
-                running: false,
-              },
-              "current-focus",
-            );
-            location.hash = "focus";
-          }}
-        >
-          <Icon name="Play" size={17} />
-        </button>
-      )}
-    </div>
-  );
-}
+import { taskEditor, TaskRow } from "../features/tasks/TaskComponents";
+export { taskEditor, TaskRow } from "../features/tasks/TaskComponents";
+import { openTaskFocus } from "../features/tasks/focus";
+import { projectEditor } from "../features/projects/editor";
+import { projectPath } from "../features/projects/model";
 export function Today() {
   const a = useApp(),
     tasks = a
@@ -188,22 +38,12 @@ export function Today() {
       .filter((e) => e.start?.startsWith(today()) && !e.cancelled)
       .sort((a, b) => a.start.localeCompare(b.start));
   const start = async () => {
-    if (!target) {
-      taskEditor(a);
-      return;
+    if (!target) return taskEditor(a);
+    try {
+      await openTaskFocus(a, target);
+    } catch (e) {
+      a.notify(e.message || "无法开始专注");
     }
-    if (current?.taskId !== target.id)
-      await a.save(
-        "focus",
-        {
-          taskId: target.id,
-          elapsed: 0,
-          minutes: target.minutes || 25,
-          running: false,
-        },
-        "current-focus",
-      );
-    location.hash = "focus";
   };
   return (
     <>
@@ -321,9 +161,7 @@ export function Today() {
               />
             </div>
             <p className="muted">
-              {done
-                ? "可继续处理剩余任务。"
-                : "还没有完成的任务。"}
+              {done ? "可继续处理剩余任务。" : "还没有完成的任务。"}
             </p>
           </Section>
           <Section
@@ -761,6 +599,16 @@ export function Inbox() {
         a.notify("已转为" + (kind === "event" ? "日程" : "任务"));
       },
     });
+  const convertProject = (r) => {
+    const id = "from-inbox:" + r.id + ":project";
+    const existing = a.list("project").find((p) => p.id === id);
+    projectEditor(a, existing || { title: r.text, sourceId: r.id }, {
+      id,
+      onSaved: async (projectId) => {
+        await a.save("inbox", { ...r, status: "converted", projectId }, r.id);
+      },
+    });
+  };
   return (
     <>
       <PageHead
@@ -784,6 +632,9 @@ export function Inbox() {
               <Button small secondary onClick={() => convert(r, "task")}>
                 转为任务
               </Button>
+              <Button small secondary onClick={() => convertProject(r)}>
+                转为项目
+              </Button>
               <Button small secondary onClick={() => convert(r, "event")}>
                 加入日程
               </Button>
@@ -806,7 +657,17 @@ export function Inbox() {
           .filter((r) => r.status !== "open")
           .map((r) => (
             <div className="record" key={r.id}>
-              <p>{r.text}</p>
+              <p>
+                {r.text}
+                {r.projectId && (
+                  <>
+                    <br />
+                    <Link className="text-link" to={projectPath(r.projectId)}>
+                      查看项目 →
+                    </Link>
+                  </>
+                )}
+              </p>
               <button
                 className="text-link"
                 onClick={() => a.save("inbox", { ...r, status: "open" }, r.id)}

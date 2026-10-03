@@ -113,15 +113,3 @@ export function More() {
     </>
   );
 }
-// Phase 1 keeps the new navigation usable before Phase 2 adds project records.
-export function ProjectsEntry() {
-  return (
-    <>
-      <PageHead title="项目" description="把一个明确结果拆成可以推进的任务。" />
-      <p className="muted">项目功能将在下一阶段接入。已有任务可继续使用。</p>
-      <Link to="tasks" className="text-link">
-        查看任务 →
-      </Link>
-    </>
-  );
-}

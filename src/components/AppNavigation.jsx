@@ -1,3 +1,4 @@
+import { projectEditor } from "../features/projects/editor";
 import React, { useEffect, useRef } from "react";
 import { Icon, Link, useApp } from "../ui";
 import {
@@ -134,6 +135,13 @@ export function AddMenu({ onClose }) {
         </button>
       </div>
       <div className="add-options">
+        <button
+          className="menu-row"
+          onClick={() => act(() => projectEditor(a))}
+        >
+          <Icon name="FolderKanban" />
+          <span>新建项目</span>
+        </button>
         <button className="menu-row" onClick={() => act(() => taskEditor(a))}>
           <Icon name="ListTodo" />
           <span>新建任务</span>

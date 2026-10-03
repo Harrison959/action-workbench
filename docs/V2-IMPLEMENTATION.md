@@ -56,3 +56,13 @@
 - `npm run build`：通过；原有大包体积警告保留。
 - `npx playwright test tests/e2e/navigation.spec.js`：桌面/Pixel 7 共 4 项通过；检查所有旧业务页面、hash 别名、历史返回、无横向溢出、任务/收件箱/日程添加与任务刷新保留；未捕获 pageerror。
 - `.qa/desktop-more.png`、`.qa/mobile-more.png` 已人工查看。浏览器工具首次运行缺少 Chromium，安装后完成验证。
+
+### Phase 2 验证（2026-10-03）
+
+- `npm test`：25 项通过。包括旧类型统计规则、项目模型/下一步/进度/生命周期、IndexedDB v1 兼容、跨 scope 隔离、新旧备份、软删除、双设备 CAS 冲突及选择保留、上传途中再次编辑、新类型失败不阻断旧类型。
+- SQL 在 PGlite 内嵌 PostgreSQL 中运行：先执行原始建表脚本，写入旧记录，再重复执行新迁移；旧记录不变，所有支持类型可写，RPC 冲突返回正确，authenticated 无直接写权限，账号互相不可见，anon 无表/RPC 权限。这不等于已执行真实 Supabase 升级。
+- `npm run test:e2e`：桌面/Pixel 7 共 10 项通过。覆盖旧页面入口与添加、完整项目生命周期、收件箱转换及防重复、新旧任务关联、专注入口、笔记、离线创建/完成、刷新保留、软删除恢复、实际 UI 导出后在隔离浏览器 UI 导入；未捕获 pageerror。
+- `npm run build`：通过。保留现有主包体积警告；移除未使用的 Sculpture lazy 引用，避免打包无入口的 3D 资源。
+- `npm run test:production`：1 项通过；生产构建置于 `/action-workbench/` 子路径，项目详情刷新、Logo 和资源加载、旧日历/复盘 hash 正常，没有资源 404 或运行异常。
+- `npm run android:sync`：通过，识别并保留 App/Filesystem/LocalNotifications/Share 四个插件。appId、通知权限与通知模块未更换。
+- 代码在 `codex/v2-navigation-projects` 分支，按两阶段独立提交。真实 Supabase 管理权限、手机真机通知和覆盖安装未验证。Android 完整编译由分支 CI 进一步验证，结果另行记录。

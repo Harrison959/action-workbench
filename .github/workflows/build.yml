@@ -1,7 +1,7 @@
 name: web-build
 on:
   push:
-    branches: [main]
+    branches: [main, 'codex/**']
   pull_request:
     branches: [main]
 jobs:

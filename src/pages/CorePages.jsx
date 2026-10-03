@@ -582,6 +582,15 @@ export function Summary() {
     r = a.list("summary").find((s) => s.date === date),
     [values, setValues] = useState({}),
     [busy, setBusy] = useState(false);
+  const writeRequest = a.route.query.get("write");
+  useEffect(() => {
+    if (!writeRequest) return;
+    setDate(today());
+    const frame = requestAnimationFrame(() =>
+      document.querySelector(".review-write-target")?.focus(),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [writeRequest]);
   useEffect(() => {
     setValues(r || {});
   }, [date, r?.id]);
@@ -667,6 +676,9 @@ export function Summary() {
               <label className="field wide" key={key}>
                 <span>{label}</span>
                 <textarea
+                  className={
+                    key === "progress" ? "review-write-target" : undefined
+                  }
                   value={values[key] || ""}
                   rows="3"
                   onChange={(e) =>

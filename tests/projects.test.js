@@ -111,7 +111,12 @@ test("project/task entry preserves paused and running focus sessions", async () 
   let writes = 0,
     notified = "";
   const app = {
-    list: () => [focus],
+    list: (kind) =>
+      kind === "focus"
+        ? [focus]
+        : kind === "task"
+          ? [{ id: "t", status: "open" }]
+          : [],
     save: async () => writes++,
     notify: (message) => (notified = message),
   };

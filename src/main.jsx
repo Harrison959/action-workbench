@@ -1,4 +1,5 @@
 import { Today } from "./features/today/Today";
+import { CommandCenter } from "./features/command/CommandCenter";
 import { Projects } from "./features/projects/Projects";
 import React, { useState, useEffect, useCallback } from "react";
 import { createRoot } from "react-dom/client";
@@ -146,9 +147,10 @@ function App() {
     sync();
   };
   const edit = (spec) => setDialog({ ...spec, key: owner + ":" + spec.key });
-  const capture = () =>
+  const capture = (options = {}) =>
     edit({
       key: "capture",
+      focusFirst: options.focusFirst === true,
       title: "先记下来",
       initial: { text: "" },
       fields: [
@@ -182,45 +184,47 @@ function App() {
   const full = route.page === "cover" || route.page === "focus";
   return (
     <Context.Provider value={ctx}>
-      <div className={full ? "app v2 full" : "app v2"}>
-        {!full && (
-          <AppNavigation page={route.page} onAdd={() => setAdding(true)} />
-        )}
-        <main id="main" className="main">
-          {loaded ? (
-            <Page key={owner + ":" + route.page + ":" + (route.id || "")} />
-          ) : (
-            <div className="loading">正在打开你的工作台…</div>
+      <CommandCenter key={owner} disabled={!loaded}>
+        <div className={full ? "app v2 full" : "app v2"}>
+          {!full && (
+            <AppNavigation page={route.page} onAdd={() => setAdding(true)} />
           )}
-        </main>
-        {!full && (
-          <MobileNavigation page={route.page} onAdd={() => setAdding(true)} />
-        )}
-        {adding && <AddMenu onClose={() => setAdding(false)} />}
-        {dialog && (
-          <FormDialog
-            key={dialog.key}
-            spec={dialog}
-            onClose={() => setDialog(null)}
-          />
-        )}
-        {toast && (
-          <div className="toast" role="status">
-            <Icon name="Check" />
-            {toast.text}
-            {toast.undo && (
-              <button
-                onClick={async () => {
-                  await toast.undo();
-                  setToast(null);
-                }}
-              >
-                撤销
-              </button>
+          <main id="main" className="main">
+            {loaded ? (
+              <Page key={owner + ":" + route.page + ":" + (route.id || "")} />
+            ) : (
+              <div className="loading">正在打开你的工作台…</div>
             )}
-          </div>
-        )}
-      </div>
+          </main>
+          {!full && (
+            <MobileNavigation page={route.page} onAdd={() => setAdding(true)} />
+          )}
+          {adding && <AddMenu onClose={() => setAdding(false)} />}
+          {dialog && (
+            <FormDialog
+              key={dialog.key}
+              spec={dialog}
+              onClose={() => setDialog(null)}
+            />
+          )}
+          {toast && (
+            <div className="toast" role="status">
+              <Icon name="Check" />
+              {toast.text}
+              {toast.undo && (
+                <button
+                  onClick={async () => {
+                    await toast.undo();
+                    setToast(null);
+                  }}
+                >
+                  撤销
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </CommandCenter>
     </Context.Provider>
   );
 }

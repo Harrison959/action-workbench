@@ -1,4 +1,5 @@
 import { projectEditor } from "../features/projects/editor";
+import { CommandTrigger } from "../features/command/CommandCenter";
 import React, { useEffect, useRef } from "react";
 import { Icon, Link, useApp } from "../ui";
 import {
@@ -59,6 +60,7 @@ export function AppNavigation({ page, onAdd }) {
           小松
         </Link>
         <div className="topbar-actions">
+          <CommandTrigger />
           <span className="desktop-only">{today()}</span>
           <button className="icon-button" onClick={onAdd} aria-label="添加">
             <Icon name="Plus" />

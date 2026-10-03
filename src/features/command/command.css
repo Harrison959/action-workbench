@@ -1,0 +1,111 @@
+.command-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: none;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.command-trigger kbd {
+  font-size: 11px;
+  font-family: inherit;
+}
+.command-dialog {
+  width: min(600px, calc(100vw - 32px));
+  max-height: min(640px, 80dvh);
+  margin: 12vh auto auto;
+  padding: 0;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 36px #0002;
+  overflow: hidden;
+}
+.command-dialog::backdrop {
+  background: #0004;
+}
+.command-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.command-search input {
+  min-width: 0;
+  flex: 1;
+  width: 0;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+}
+.command-results {
+  max-height: min(460px, calc(80dvh - 110px));
+  overflow: auto;
+  padding: 6px;
+}
+.command-group {
+  padding: 12px 10px 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.command-option {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.command-option span {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.command-option small {
+  color: var(--muted);
+  max-width: 40%;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.command-option.selected {
+  background: var(--wash);
+  outline: 1px solid var(--line);
+  color: var(--green);
+}
+.command-empty {
+  padding: 18px 10px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.command-hints {
+  display: flex;
+  gap: 18px;
+  border-top: 1px solid var(--line);
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.command-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (max-width: 800px) {
+  .command-trigger {
+    display: none;
+  }
+}

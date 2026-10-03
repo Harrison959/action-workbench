@@ -255,6 +255,8 @@ export function FormDialog({ spec, onClose }) {
   useEffect(() => {
     dialog.current.showModal();
     const el = dialog.current;
+    if (spec.focusFirst)
+      el.querySelector("form input, form textarea, form select")?.focus();
     const cancel = (e) => {
       e.preventDefault();
       onClose();

@@ -77,7 +77,7 @@
 
 仅重构 Today，以及其复用任务行的紧凑显示。页面按「现在做什么 → 今日重点 → 今日时间线 → 快速记录 → 今日完成数」排列。统计卡片、首页英文口号和装饰性文案已移除；完整任务仍在 Tasks，项目与日历页面保持原有职责。没有实现后续阶段。
 
-Today 从 CorePages 拆出为 `src/features/today/Today.jsx`，分离 selector、时间线 helper、分区组件、快速记录和局部样式。复用 TaskRow / taskEditor、openTaskFocus、eventEditor、现有 Inbox 和 app.save；没有第二套专注系统。
+Today 从 CorePages 拆出为 `src/features/today/Today.jsx`，分离 selector、时间线 helper、分区组件、快速记录和局部样式。复用 TaskRow / taskEditor、openTaskFocus、eventEditor、现有 Inbox 和 app.save；没有第二套专注系统。Focus 读取也与入口一致优先 current-focus，避免旧记录与当前会话并存时打开错误任务。
 
 ### Next Action 的最终规则
 

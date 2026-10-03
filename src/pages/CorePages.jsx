@@ -116,7 +116,9 @@ export function Tasks() {
 }
 export function Focus() {
   const a = useApp(),
-    foc = a.list("focus")[0],
+    foc =
+      a.list("focus").find((f) => f.id === "current-focus") ||
+      a.list("focus")[0],
     task = a.list("task").find((t) => t.id === foc?.taskId),
     [tick, setTick] = useState(Date.now());
   useEffect(() => {

@@ -181,6 +181,14 @@ test("Focus wins, resume retains elapsed, and finished Focus releases recommenda
     t("正在做的旧任务", { date: "2026-01-01" }),
     {
       kind: "focus",
+      id: "aaa-legacy-focus",
+      taskId: "今天重点",
+      elapsed: 20000,
+      running: false,
+      minutes: 25,
+    },
+    {
+      kind: "focus",
       id: "current-focus",
       taskId: "正在做的旧任务",
       elapsed: 60000,
@@ -197,22 +205,23 @@ test("Focus wins, resume retains elapsed, and finished Focus releases recommenda
     .getByRole("button", { name: "开始专注", exact: true })
     .click();
   await expect(page).toHaveURL(/#focus$/);
+  await expect(page.locator(".focus-page")).toContainText("正在做的旧任务");
   const f = await page.evaluate(async () =>
     (await (await import("/src/db.js")).records()).find(
-      (r) => r.kind === "focus",
+      (r) => r.id === "current-focus",
     ),
   );
   expect(f.elapsed).toBe(60000);
   await page.evaluate(async () => {
     const db = await import("/src/db.js");
-    const f = (await db.records()).find((r) => r.kind === "focus");
+    const f = (await db.records()).find((r) => r.id === "current-focus");
     await db.put("focus", { ...f, running: true, started: Date.now() }, f.id);
   });
   await page.goto("/#today");
   await expect(page.locator(".today-reason")).toHaveText("正在专注的任务");
   await page.evaluate(async () => {
     const db = await import("/src/db.js");
-    const f = (await db.records()).find((r) => r.kind === "focus");
+    const f = (await db.records()).find((r) => r.id === "current-focus");
     await db.put(
       "focus",
       { ...f, running: false, elapsed: 0, started: null },

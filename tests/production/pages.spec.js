@@ -1,5 +1,23 @@
 import { test, expect } from "@playwright/test";
 
+test('Data reads legacy guitar input under the production subpath', async ({page}) => {
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(()=>localStorage.setItem('action-cloud',JSON.stringify({url:'',key:''})));
+  await page.goto('./#guitar');
+  await page.getByRole('button',{name:'记录练琴',exact:true}).click();
+  await page.getByLabel('练习内容').fill('生产路径验证');
+  await page.getByLabel('练习分钟').fill('20');
+  await page.getByRole('dialog').getByRole('button',{name:'保存记录',exact:true}).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await page.goto('./#data');
+  await expect(page.locator('[data-tracker="guitar.minutes"] .tracker-value')).toHaveText('20 分钟');
+  await page.reload();
+  await expect(page.locator('[data-tracker="guitar.minutes"] .tracker-value')).toHaveText('20 分钟');
+  await page.getByLabel('打开吉他练习时长原始记录').click();
+  await expect(page.getByText('生产路径验证',{exact:true})).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
 test("Command Center works in the built Pages subpath without resource errors", async ({
   page,
 }) => {

@@ -1,6 +1,6 @@
 import React from "react";
-import { PageHead, Section, Link, Icon, useApp } from "../ui";
-import { today, money, sum } from "../domain";
+import { PageHead, Section, Link, Icon } from "../ui";
+export { Data } from "../features/trackers/Data";
 
 function Menu({ items }) {
   return (
@@ -16,62 +16,6 @@ function Menu({ items }) {
         </Link>
       ))}
     </div>
-  );
-}
-export function Data() {
-  const a = useApp(),
-    date = today(),
-    onDay = (kind) => a.list(kind).filter((r) => r.date === date);
-  const sleep = onDay("sleep")[0],
-    income = onDay("income"),
-    body = onDay("body").find((r) => r.weight !== "" && r.weight != null);
-  const duration = (kind) =>
-    onDay(kind).length ? `${sum(onDay(kind), "minutes")} 分钟` : "今天未记录";
-  return (
-    <>
-      <PageHead
-        title="数据"
-        description="查看今日记录，进入对应项目补记或看趋势。"
-      />
-      <Menu
-        items={[
-          [
-            "income",
-            "公众号收入",
-            income.length ? money(sum(income, "cents")) : "今天未记录",
-            "Newspaper",
-          ],
-          [
-            "sleep",
-            "睡眠",
-            sleep
-              ? `${Math.floor(sleep.minutes / 60)} 小时 ${sleep.minutes % 60} 分钟`
-              : "今天未记录",
-            "Moon",
-          ],
-          [
-            "fitness",
-            "健身与身体",
-            `${duration("workout")}${body ? ` · ${body.weight} kg` : ""}`,
-            "Dumbbell",
-          ],
-          ["courses", "专业课", duration("study"), "GraduationCap"],
-          [
-            "english",
-            "英语",
-            `${onDay("episode").length} 条观看 · ${onDay("reading").length} 条阅读`,
-            "BookOpen",
-          ],
-          ["guitar", "吉他", duration("guitar"), "Music2"],
-          [
-            "emotion",
-            "情绪",
-            onDay("emotion")[0]?.mood || "今天未记录",
-            "Heart",
-          ],
-        ]}
-      />
-    </>
   );
 }
 export function More() {

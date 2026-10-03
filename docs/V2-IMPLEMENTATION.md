@@ -175,3 +175,41 @@ Focus：有效运行/暂停会话显示「继续专注：任务名」，计时�
 真实 Supabase 多设备往返、macOS 实机、Android 真机与覆盖签名、通知仍需实际环境验证；本次 Cmd 逻辑通过模拟 Mac 平台的 Chromium 和纯函数测试，不冒称实机测试。原离线壳缓存和附件同步边界不变。
 
 代码基于 `codex/v2-command-center`，Phase 3 旧版以标签 `backup/before-phase4-command-20261003` 保留。CI 验证后合并 main，沿用现有 Pages / Android 工作流；实际发布结论以对应 Actions 状态为准。
+
+## Phase 5A + 5B：只读 Tracker（2026-10-04）
+
+本阶段仅建立代码内置定义、旧记录 Adapter、统一读取接口和 Data 指标列表。没有 tracker/trackerEntry 持久化记录，没有历史重写、双写、SQL migration 或 IndexedDB 升级；原业务录入、Review、Today、Sales、通知和导入导出保持原实现。停止于 5B。
+
+### 来源和口径
+
+- sleep.duration：sleep.minutes，latest；按醒来日期，使用已有扣除夜醒后的分钟。
+- body.weight / height / waist / arm / shoulder：body 对应字段，latest；体重默认显示，其余在其他身体测量中。真实代码没有体脂、臀围。
+- workout.minutes：workout.minutes，sum；不含 routine 计划。
+- study.minutes：study.minutes，sum；仅专业课，不叠加 Focus。
+- english.minutes：episode.minutes + reading.minutes，sum；word 没有明确分钟，不推算。
+- guitar.minutes：guitar.minutes，sum；曲目、BPM、录音留在原页。
+- emotion.intensity：emotion.intensity，latest；保留 mood 标签，范围为 1–5，不是示例的 1–10 心情分；页面不跨情绪状态展示平均强度。
+- income.amount：income.cents，sum，整数分；显示已录公众号收入，不含 deal、不假设账号已全部填齐。
+
+所有定义包含 id/name/type/unit/category/aggregation/target/sourceKey/active。target 为 null，不创建目标。类型只有 number/duration/score/money；聚合支持 sum/mean/latest。定义为只读代码，不是用户可编辑表达式。
+
+### 稳定读取接口
+
+createTrackerReader(rows) 基于当前账号 app.rows 构造内存快照，提供 getDailyValue、getRangeValues、getWeeklyTotal、getAverage、getRecordedDayCount。范围两端包含；周总量从传入起始日期起连续七天，仅接受 duration/money，返回范围和记录天数。平均为有效每日值的平均，不按原始记录数量加权。缺失 value=null，显式 0 仍有效；无记录周总量为 null。
+
+Adapter 不导入存储或同步模块。输出带 trackerId/date/value/observedAt/note/label/sourceKind/sourceId；不修改来源。非法日期、空值、非有限数字、非法评分不进入统计，不回写修复。记录变更通过原 db.subscribe 更新 app.rows 后重算。
+
+latest 使用睡眠 wake 或情绪 date+time；同一日存在缺时间的候选时，对整组以 kind/id 稳定排序选择，返回 uncertainOrder 并明确显示无法确认先后。body 当前没有可靠测量时间，不能用同步顺序、updatedAt 或随机 ID 假称真实时间；ID 仅作确定性回退。时间相同时也以 kind/id 打破平局。
+
+### Data 界面
+
+保留数据页面标题与旧模块路由，使用紧凑列表。点击指标或记录链接打开原业务页面；不改变录入方式。7/30 天仅折叠显示每日汇总、记录天数和适用指标的日均，不增加复杂图表、趋势一级页或自定义创建。跨午夜和返回前台更新当天。
+
+### 验证
+
+- npm test：44 项通过，含新增 5 项 Tracker 测试；既有备份、IndexedDB、模拟双端 CAS、SQL/RLS 测试继续通过。
+- npm run test:e2e：30 项通过，8 项按设备范围跳过，无失败。新增桌面/手机测试核对全部主要指标、原路由、30 天汇总、刷新、备份行完全不变、删除恢复、无 pageerror 和无横向溢出。
+- npm run build：通过，保留现有主包大于 500 kB 警告。
+- npm run test:production：4 项通过，新增在 /action-workbench/ 下从原吉他表单录入、Data 读取、刷新及返回原记录的测试。
+
+未验证真实 Supabase 往返和 Android 真机。此阶段没有新 kind 或同步协议变化，现有离线应用壳、附件二进制不同步和 APK 签名边界不变。缺时间旧身体记录无法还原实际先后；缺失或非法值不等于零。未进入 5C、自定义 Tracker、Weekly Review 或 Insight。

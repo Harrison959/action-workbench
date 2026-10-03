@@ -1,5 +1,5 @@
 import { openDB } from 'idb';
-import { KINDS, validateBackup } from './domain';
+import { KINDS, validateBackup } from './domain.js';
 const db = openDB('action-workbench', 1, { upgrade(db) { db.createObjectStore('records',{keyPath:'key'}); db.createObjectStore('meta'); db.createObjectStore('files'); } });
 const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('action-records') : null;
 const listeners = new Set();

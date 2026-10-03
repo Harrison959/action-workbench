@@ -1,0 +1,156 @@
+/* Phase 1: compact app chrome; the existing detail pages retain their controls. */
+.app.v2 {
+  --serif: "DM Sans", "Microsoft YaHei", sans-serif;
+}
+.v2 .sidebar {
+  width: 218px;
+  padding: 26px 16px;
+}
+.app.v2:not(.full) {
+  padding-left: 218px;
+}
+.v2 .brand {
+  gap: 8px;
+}
+.v2 .brand > span {
+  font:
+    600 20px/1.4 "Microsoft YaHei",
+    sans-serif;
+  letter-spacing: 0;
+}
+.v2 .brand img {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+.v2 .side-nav > a {
+  padding: 11px 12px;
+  min-height: 44px;
+}
+.v2 .side-nav > .nav-secondary-start {
+  margin-top: 22px;
+}
+.v2 .main {
+  max-width: 1320px;
+  padding-top: 28px;
+}
+.v2 .page-head {
+  margin-bottom: 24px;
+}
+.v2 h1 {
+  font-size: 28px;
+  letter-spacing: 0;
+}
+.v2 .section {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  padding: 20px 0;
+  margin-bottom: 12px;
+}
+.v2 .page-head .eyebrow,
+.v2 .section-head .eyebrow,
+.v2 .dialog-top .eyebrow {
+  display: none;
+}
+.v2 .focus-index,
+.v2 .focus-card-bottom,
+.v2 .margin-note,
+.v2 .focus-footer {
+  display: none;
+}
+.v2 .focus-card:after {
+  content: none;
+}
+.v2 .focus-card-body {
+  min-height: auto;
+  padding: 0 24px 24px;
+}
+.v2 .focus-card h2 {
+  font-size: 27px;
+}
+.v2 .focus-card-top {
+  padding: 20px 24px;
+}
+.v2 .task-row {
+  min-height: 72px;
+}
+.v2 .mobile-brand {
+  font:
+    600 21px "Microsoft YaHei",
+    sans-serif;
+}
+.hub-list .menu-row {
+  min-height: 64px;
+  width: 100%;
+  text-align: left;
+}
+.hub-list .menu-row small {
+  display: block;
+  font-size: 12px;
+  margin-top: 3px;
+}
+.add-options {
+  padding: 8px 24px 22px;
+}
+.add-options .menu-row {
+  width: 100%;
+  text-align: left;
+}
+.v2 .bottom-nav button {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 47px;
+  color: var(--green);
+}
+.v2 .bottom-nav button span {
+  font-size: 10px;
+}
+.v2 .bottom-nav button svg {
+  width: 23px;
+  height: 23px;
+}
+.page-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: -8px 0 20px;
+}
+@media (max-width: 760px) {
+  .app.v2:not(.full) {
+    padding-left: 0;
+  }
+  .v2 .main {
+    padding: 22px 18px calc(100px + env(safe-area-inset-bottom));
+  }
+  .v2.full .main {
+    padding: 0;
+  }
+  .v2 .page-head {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .v2 h1 {
+    font-size: 25px;
+  }
+  .v2 .section {
+    padding: 18px 0;
+  }
+  .v2 .page-head .button {
+    margin-top: 0;
+  }
+  .v2 .focus-card h2 {
+    font-size: 24px;
+  }
+  .v2 .focus-card-body {
+    padding: 0 20px 22px;
+  }
+  .v2 .focus-card-top {
+    padding: 18px 20px;
+  }
+}

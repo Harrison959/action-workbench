@@ -65,4 +65,7 @@
 - `npm run build`：通过。保留现有主包体积警告；移除未使用的 Sculpture lazy 引用，避免打包无入口的 3D 资源。
 - `npm run test:production`：1 项通过；生产构建置于 `/action-workbench/` 子路径，项目详情刷新、Logo 和资源加载、旧日历/复盘 hash 正常，没有资源 404 或运行异常。
 - `npm run android:sync`：通过，识别并保留 App/Filesystem/LocalNotifications/Share 四个插件。appId、通知权限与通知模块未更换。
-- 代码在 `codex/v2-navigation-projects` 分支，按两阶段独立提交。真实 Supabase 管理权限、手机真机通知和覆盖安装未验证。Android 完整编译由分支 CI 进一步验证，结果另行记录。
+- Android 完整 Gradle 编译已在 [Actions 37120998169](https://github.com/Harrison959/action-workbench/actions/runs/37120998169) 通过（实现提交 `d2be3ff`），产出 debug APK。真机通知和与旧安装包签名兼容尚未验证。
+- 网页 CI 首轮发现收件箱二次转项目测试过早跳转列表页，已补充保存完成与详情显示等待；本机相关桌面/移动测试通过，CI 随最终提交重跑。
+- 最终检查补充保留原有独立任务草稿 key 与桌面封面/专注全屏容器，快速添加与生产封面资源测试通过。
+- 代码在 `codex/v2-navigation-projects` 分支，按两阶段独立提交，审阅入口 [PR #1](https://github.com/Harrison959/action-workbench/pull/1)。真实 Supabase 管理权限、手机真机通知和覆盖安装未验证；线上 Pages 目前仍为原版，分支未合并。

@@ -26,7 +26,7 @@ export function taskEditor(app, row = {}) {
       label: "原关联项目（待同步或在回收站）",
     });
   app.edit({
-    key: "task:" + (row.id || "new:" + (row.projectId || "standalone")),
+    key: "task:" + (row.id || (row.projectId ? "new:" + row.projectId : "new")),
     title: row.id ? "任务详情" : "把下一步写清楚",
     initial: {
       date: today(),

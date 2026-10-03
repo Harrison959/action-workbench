@@ -34,6 +34,10 @@
   max-width: 1320px;
   padding-top: 28px;
 }
+.v2.full .main {
+  max-width: none;
+  padding: 0;
+}
 .v2 .page-head {
   margin-bottom: 24px;
 }

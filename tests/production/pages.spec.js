@@ -17,5 +17,7 @@ test('production assets and persisted project detail work under the GitHub Pages
   expect(await page.locator('.brand img').evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
   await page.goto('./#summary');await expect(page.getByRole('heading',{name:'每日小结',exact:true})).toBeVisible();
   await page.goto('./#schedule');await expect(page.getByRole('heading',{name:'日程',exact:true})).toBeVisible();
+  await page.goto('./#cover');await expect(page.locator('.cover-art')).toBeVisible();
+  expect(await page.locator('.cover-art').evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
   expect(errors).toEqual([]);expect(missing).toEqual([]);
 });

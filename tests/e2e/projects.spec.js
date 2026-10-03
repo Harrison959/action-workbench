@@ -266,6 +266,8 @@ test("inbox can become a project without duplicating it, details fit small scree
   await page.getByRole("button", { name: "放回收件箱", exact: true }).click();
   await page.getByRole("button", { name: "转为项目", exact: true }).click();
   await page.getByRole("button", { name: "保存项目", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "准备小组汇报", exact: true })).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.goto("/#projects");
   await expect(page.locator(".project-list-row")).toHaveCount(1);
   await page.locator(".project-list-row").click();

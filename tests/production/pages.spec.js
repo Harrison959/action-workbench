@@ -1,5 +1,58 @@
 import { test, expect } from "@playwright/test";
 
+test("Command Center works in the built Pages subpath without resource errors", async ({
+  page,
+}) => {
+  const errors = [],
+    missing = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  page.on("response", (r) => {
+    if (r.status() >= 400 && r.url().startsWith("http://127.0.0.1:4176"))
+      missing.push(r.url());
+  });
+  await page.addInitScript(() =>
+    localStorage.setItem("action-cloud", JSON.stringify({ url: "", key: "" })),
+  );
+  await page.goto("./#more");
+  await expect(
+    page.getByRole("button", { name: "打开命令中心" }),
+  ).toBeEnabled();
+  await page.keyboard.press("Control+k");
+  await page.getByRole("combobox").fill("新建项目");
+  await page.keyboard.press("Enter");
+  await page.getByLabel("项目名称").fill("Command 子路径项目");
+  await page.getByLabel("完成结果").fill("生产命令可用");
+  await page.getByRole("button", { name: "创建项目", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Command 子路径项目", exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Command 子路径项目", exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Control+k");
+  await page.getByRole("combobox").fill("command");
+  await expect(page.getByRole("option")).toHaveCount(1);
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/action-workbench\/#projects\//);
+  await page.keyboard.press("Control+k");
+  await page.getByRole("combobox").fill("快速记录");
+  await page.keyboard.press("Enter");
+  await expect(page.getByLabel("想到什么？")).toBeFocused();
+  await page.getByLabel("想到什么？").fill("生产命令收件箱记录");
+  await page.getByRole("button", { name: "保存记录", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.keyboard.press("Control+k");
+  await page.getByRole("combobox").fill("打开收件箱");
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/#inbox$/);
+  await expect(
+    page.getByText("生产命令收件箱记录", { exact: true }),
+  ).toBeVisible();
+  expect(errors).toEqual([]);
+  expect(missing).toEqual([]);
+});
+
 test("production assets and persisted project detail work under the GitHub Pages subpath", async ({
   page,
 }) => {

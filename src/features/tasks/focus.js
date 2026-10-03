@@ -3,7 +3,14 @@ export async function openTaskFocus(app, task) {
   const active =
     app.list("focus").find((f) => f.id === "current-focus") ||
     app.list("focus")[0];
-  if (active?.running && active.taskId !== task.id) {
+  const activeTask = app.list("task").find((t) => t.id === active?.taskId);
+  if (
+    active?.running &&
+    activeTask &&
+    !activeTask.deleted &&
+    !["done", "cancelled"].includes(activeTask.status) &&
+    active.taskId !== task.id
+  ) {
     app.notify("请先暂停当前专注，再切换任务");
     location.hash = "focus";
     return;

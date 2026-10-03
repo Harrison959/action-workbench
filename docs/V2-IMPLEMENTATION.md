@@ -1,6 +1,6 @@
 # V2 架构分析与实施记录
 
-对应需求：根目录 `V2_REDESIGN.md`（用户提供的完整原文）。Phase 1、Phase 2 已完成并合并；本次后续工作仅实施 Phase 3（Today），停止于 Phase 3。
+对应需求：根目录 `V2_REDESIGN.md`（用户提供的完整原文）。Phase 1、Phase 2、Phase 3 已完成并合并；本次后续工作仅实施 Phase 4（Command Center），停止于 Phase 4。
 
 ## 现状与复用
 
@@ -46,7 +46,7 @@
 
 1. **Phase 1**：七项桌面导航，五项手机导航；今天默认入口；更多/数据聚合旧页；快速添加；旧链接/通知入口兼容。运行单元测试、构建、桌面及移动端浏览器检查。
 2. **Phase 2**：项目模型/列表/详情；关联旧任务和新增任务；下一步、计算进度、状态、笔记/真实历史；备份扩展和同步迁移保护。验证项目生命周期、旧记录不变、离线读写、冲突/跨端协议、导入导出和移动端交互。
-3. **Phase 3（独立后续实施）**：Today 决策入口；详细规则与验证见下方。其后仍不实施 Command Center → Tracker → 周复盘 → Insight → 完整 UI 精修。旧功能保持可用，不以空壳替换。
+3. **Phase 3（独立后续实施）**：Today 决策入口；详细规则与验证见下方。Phase 4 在独立后续请求中实施，见下方；Tracker、周复盘、Insight 和全局 UI 精修仍不实施。旧功能保持可用，不以空壳替换。
 
 实际测试和部署状态记录在下方，未执行的检查不得标记通过。
 
@@ -117,3 +117,61 @@ Today 从 CorePages 拆出为 `src/features/today/Today.jsx`，分离 selector�
 ### Git 与发布
 
 基于 main 的 24b954d 开发，Phase 1 / 2 稳定代码以标签 `backup/before-phase3-today-20261003` 保留。本阶段独立分支 `codex/v2-today`，通过 CI 后合并 main；Pages 与 Android 沿用现有发布工作流。部署结果以实际 Actions 结果为准，不将本地通过等同于线上已发布。
+
+
+## Phase 4：Command Center（2026-10-03）
+
+### 实现范围
+
+基于 Phase 3 已合并的 main（682ab25）开发。命令中心只负责选择与调用操作：没有 AI 解析、新的一级导航、数据库字段、kind、IndexedDB 升级或 Supabase migration；Today、Projects 页面与模型不变。
+
+独立模块 `src/features/command/`：
+
+- `CommandCenter.jsx`：全局快捷键、原生 dialog、组合框/结果选择、关闭与焦点交接。
+- `commands.js`：固定命令清单、复用 Today selector 计算 Focus 命令候选。
+- `search.js`：纯 substring 搜索、分组排序、平台快捷键判断与箭头索引。
+- `actions.js`：复用 taskEditor、projectEditor、app.capture、eventEditor、openTaskFocus 和现有 hash 路由。
+- `command.css`：局部样式与桌面触发按钮；无渐变或复杂动画。
+
+### 命令清单（13 项）
+
+默认优先顺序：新建任务、快速记录到收件箱、新建项目、开始/继续专注、添加日程，其后为写每日小结，以及打开今天、项目、日历、复盘、收件箱、数据、更多。
+
+写每日小结使用现有 Review 表单。`review?write=<请求时间>` 仅是界面打开请求，每次跳转都回到今天并聚焦首个小结输入；后续手动查看历史日期仍可用，不新增小结记录格式或重复复盘系统。
+
+Focus：有效运行/暂停会话显示「继续专注：任务名」，计时与状态保持；其他情况使用 Today 的完整 Next Action 规则选任务。无候选进入既有 Focus 选择入口。补充现有 openTaskFocus 对失效运行记录的校验：已完成、取消、删除或找不到的任务不会阻挡用户明确开始下一项；有效运行任务的切换保护继续保留。
+
+### 搜索规则
+
+- 无输入（含纯空白）仅显示固定命令，不倾倒全部项目和任务。
+- 输入去首尾空白后，不区分大小写 substring 匹配；顺序为命令 → 项目 → 未完成任务。
+- 命令匹配中文名称及少量直接别名（Today / Projects / Calendar / Review / Inbox / Data / More，开始/继续专注）。不做语义匹配。
+- 项目仅搜索未删除、未完成、未归档的标题，包含进行中和暂停项目；任务仅搜索未删除、非 done / cancelled 的标题，旧记录缺少 status 仍可搜索。
+- 同组按标题、ID 稳定排序；点击项目进入 Project Detail，点击任务打开现有详情编辑器。全部数据取自当前账号的现有 app.list，随存储订阅更新，不建搜索索引记录或请求额外云端查询。
+
+### 键盘、焦点与移动端
+
+- 桌面宽度 > 800px：Windows/Linux Ctrl+K，macOS Cmd+K；再次按下或 Esc 关闭。
+- 不拦截 Shift/Alt 组合、另一平台修饰键、按住重复事件、输入法组字、已处理事件；编辑输入框/富文本、其他原生弹窗及数据未加载时不拦截。
+- 打开后搜索框聚焦；↑/↓ 循环选择，Enter 执行，鼠标可点击；无匹配时 Enter 不执行。Tab 仍能访问关闭按钮，不将其 Enter 误当成结果执行。
+- 原生 dialog 限制背景交互。关闭先释放 modal 再恢复原焦点；跳转完成后聚焦目标页标题；命令打开表单时，通过可选 `focusFirst` 聚焦首个字段。该参数只用于 UI spec，不写入业务记录，原入口默认行为不变。
+- 桌面顶栏增加「搜索与命令」低调入口，主导航仍七项。手机不显示该按钮、不拦截快捷键，底栏五项和原 Add Menu 完整保留。
+
+### 修改文件
+
+上述五个 command 文件；接入：`src/main.jsx`、`src/components/AppNavigation.jsx`；复用支持：`src/ui.jsx`、`src/pages/CorePages.jsx`、`src/features/tasks/focus.js`；测试：`tests/command.test.js`、`tests/e2e/command.spec.js`、`tests/projects.test.js`、`tests/production/pages.spec.js`；本实施记录。共 15 个文件。
+
+### 本地验收
+
+- `npm test`：39 项通过，新增六项命令/搜索/快捷键/Focus 测试，原有统计、存储、同步、备份、RLS 与 Today 测试保留。
+- `npm run test:e2e`：28 项通过，8 项按设备范围跳过（手机不运行七个桌面快捷键用例，桌面不运行一个手机专用用例），没有测试失败。覆盖 Ctrl/Cmd 切换、Esc、输入框聚焦、箭头循环、Enter、无结果、关闭按钮 Enter、关闭焦点恢复、七个页面导航、全屏 Focus、真实项目/任务搜索、任务/项目/日程/Inbox 创建、刷新持久化、未知字段保留、当天小结与历史切换、运行/暂停/失效 Focus；原 20 项 E2E 继续通过，未捕获 pageerror。
+- `npm run build`：通过；保留原主包体积提示，不在本阶段全局拆包。
+- `npm run test:production`：3 项通过，新增生产命令测试；原 Pages 子路径、资源、封面、旧路由、项目与 Today 持久化继续通过。首次用例在 reload 后过早发送快捷键，补充页面加载等待后通过。
+- `npm run android:sync`：通过，原四个 Capacitor 插件保留；本机无 JDK/Android SDK，完整 APK 仍由 Actions 验证。
+- `.qa/command-search.png` 已人工查看；测试使用独立浏览器、本地测试记录并关闭真实云端配置，没有访问或写入用户实际账号。
+
+### 未验证边界与发布
+
+真实 Supabase 多设备往返、macOS 实机、Android 真机与覆盖签名、通知仍需实际环境验证；本次 Cmd 逻辑通过模拟 Mac 平台的 Chromium 和纯函数测试，不冒称实机测试。原离线壳缓存和附件同步边界不变。
+
+代码基于 `codex/v2-command-center`，Phase 3 旧版以标签 `backup/before-phase4-command-20261003` 保留。CI 验证后合并 main，沿用现有 Pages / Android 工作流；实际发布结论以对应 Actions 状态为准。

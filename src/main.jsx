@@ -1,3 +1,4 @@
+import { Today } from "./features/today/Today";
 import { Projects } from "./features/projects/Projects";
 import React, { useState, useEffect, useCallback } from "react";
 import { createRoot } from "react-dom/client";
@@ -7,7 +8,6 @@ import { initNotifications, scheduleEvents } from "./notifications";
 import { today } from "./domain";
 import { Context, Icon, FormDialog, textField } from "./ui";
 import {
-  Today,
   Tasks,
   Focus,
   Goals,

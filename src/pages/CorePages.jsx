@@ -18,195 +18,8 @@ import {
 import { STREAMS, today, addDays, money, sum, elapsedFocus } from "../domain";
 import { taskEditor, TaskRow } from "../features/tasks/TaskComponents";
 export { taskEditor, TaskRow } from "../features/tasks/TaskComponents";
-import { openTaskFocus } from "../features/tasks/focus";
 import { projectEditor } from "../features/projects/editor";
 import { projectPath } from "../features/projects/model";
-export function Today() {
-  const a = useApp(),
-    tasks = a
-      .list("task")
-      .filter((t) => t.date === today() && t.status !== "cancelled"),
-    done = tasks.filter((t) => t.status === "done").length,
-    top = tasks.filter((t) => t.top),
-    current = a.list("focus")[0],
-    target =
-      tasks.find((t) => t.id === current?.taskId && t.status !== "done") ||
-      top.find((t) => t.status === "open") ||
-      tasks.find((t) => t.status === "open"),
-    events = a
-      .list("event")
-      .filter((e) => e.start?.startsWith(today()) && !e.cancelled)
-      .sort((a, b) => a.start.localeCompare(b.start));
-  const start = async () => {
-    if (!target) return taskEditor(a);
-    try {
-      await openTaskFocus(a, target);
-    } catch (e) {
-      a.notify(e.message || "无法开始专注");
-    }
-  };
-  return (
-    <>
-      <div className="page-tools">
-        <Link to="tasks">全部任务</Link>
-        <Link to="plan">提前安排</Link>
-      </div>
-      <PageHead
-        eyebrow="A DAY, WELL SPENT"
-        title="今日行动"
-        description="查看今日任务、固定日程与完成情况。"
-        action={
-          <Button secondary icon="Plus" onClick={() => taskEditor(a)}>
-            新建任务
-          </Button>
-        }
-      />
-      <div className="today-grid">
-        <div>
-          <section className="focus-card">
-            <div className="focus-card-top">
-              <span className="eyebrow">当前任务</span>
-              <span className="live-label">
-                <i /> {current?.running ? "正在专注" : "等待开始"}
-              </span>
-            </div>
-            <div className="focus-card-body">
-              <p className="focus-index">
-                01 <span>/ YOUR NEXT MOVE</span>
-              </p>
-              <h2>
-                {target ? (
-                  target.title
-                ) : (
-                  <>
-                    重要的事，
-                    <br />
-                    从一个行动开始。
-                  </>
-                )}
-              </h2>
-              <p>
-                {target
-                  ? `${STREAMS.find((s) => s.id === target.stream)?.name || "个人任务"} · 预计 ${target.minutes || 25} 分钟`
-                  : "给今天选一件最想推进的事，把开始变得简单。"}
-              </p>
-              <Button icon="ArrowUpRight" onClick={start}>
-                {target
-                  ? current?.running
-                    ? "继续专注"
-                    : "开始专注"
-                  : "选择第一件事"}
-              </Button>
-            </div>
-            <div className="focus-card-bottom">
-              <span>ACTION OVER INTENTION.</span>
-              <span>{target?.priority || "START SMALL"}</span>
-            </div>
-          </section>
-          <Section
-            title="今天最重要的三件事"
-            label="TODAY TOP 3"
-            action={
-              <Link to="plan" className="text-link">
-                安排计划 <Icon name="ArrowUpRight" size={15} />
-              </Link>
-            }
-          >
-            {top.length ? (
-              top.map((t, i) => (
-                <TaskRow
-                  key={t.id}
-                  task={t}
-                  number={String(i + 1).padStart(2, "0")}
-                />
-              ))
-            ) : (
-              <div className="top-empty">
-                <span>01</span>
-                <div>
-                  <h3>给今天留一个明确的重点</h3>
-                  <p>从一件开始，最多三件。</p>
-                </div>
-                <button
-                  className="icon-button"
-                  aria-label="添加重点任务"
-                  onClick={() => taskEditor(a, { top: true })}
-                >
-                  <Icon name="Plus" />
-                </button>
-              </div>
-            )}
-          </Section>
-          {tasks.some((t) => !t.top) && (
-            <Link to="tasks" className="all-tasks">
-              查看今日全部 {tasks.length} 项任务{" "}
-              <Icon name="ArrowRight" size={17} />
-            </Link>
-          )}
-        </div>
-        <aside className="today-aside">
-          <Section title="完成情况" label="DAILY PROGRESS">
-            <div className="progress-numbers">
-              <strong>{String(done).padStart(2, "0")}</strong>
-              <span>
-                / {String(tasks.length).padStart(2, "0")}
-                <small>今日已完成</small>
-              </span>
-            </div>
-            <div className="progress-track">
-              <i
-                style={{
-                  width: `${tasks.length ? (done / tasks.length) * 100 : 0}%`,
-                }}
-              />
-            </div>
-            <p className="muted">
-              {done ? "可继续处理剩余任务。" : "还没有完成的任务。"}
-            </p>
-          </Section>
-          <Section
-            title="接下来的约定"
-            label="ON THE CALENDAR"
-            action={
-              <Link to="schedule" aria-label="查看日程">
-                <Icon name="ArrowUpRight" />
-              </Link>
-            }
-          >
-            {events.length ? (
-              events.slice(0, 3).map((e) => (
-                <div className="event-mini" key={e.id}>
-                  <span>{e.start.slice(11, 16)}</span>
-                  <div>
-                    <strong>{e.title}</strong>
-                    <small>{e.fixed ? "固定约定" : "可调整日程"}</small>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="quiet-note">
-                今天还没有固定日程。
-                <br />
-                <Link to="schedule">添加一个约定 →</Link>
-              </p>
-            )}
-          </Section>
-          <Link to="summary" className="review-card">
-            <span className="eyebrow">每日复盘</span>
-            <h3>今日小结</h3>
-            <p>留下一点复盘，为明天腾出方向。</p>
-            <Icon name="ArrowUpRight" />
-          </Link>
-          <p className="margin-note">
-            A LITTLE PROGRESS,
-            <br />
-            EVERY SINGLE DAY.
-          </p>
-        </aside>
-      </div>
-    </>
-  );
-}
 export function Tasks() {
   const a = useApp(),
     [tab, setTab] = useState("today"),
@@ -224,11 +37,12 @@ export function Tasks() {
               ? t.status === "done"
               : true) &&
         (!stream || t.stream === stream) &&
-        t.title.toLowerCase().includes(search.toLowerCase()),
+        (t.title || "").toLowerCase().includes(search.toLowerCase()),
     )
     .sort(
       (x, y) =>
-        x.date.localeCompare(y.date) || x.priority.localeCompare(y.priority),
+        (x.date || "").localeCompare(y.date || "") ||
+        (x.priority || "P2").localeCompare(y.priority || "P2"),
     );
   return (
     <>

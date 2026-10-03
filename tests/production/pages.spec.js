@@ -1,5 +1,18 @@
 import { test, expect } from "@playwright/test";
 
+test('Weekly Review saves and refreshes under the Pages subpath while Daily remains accessible',async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(()=>localStorage.setItem('action-cloud',JSON.stringify({url:'',key:''})));
+  await page.goto('./#review?view=weekly');
+  await expect(page.getByRole('heading',{name:'每周复盘',exact:true})).toBeVisible();
+  await page.getByLabel('下周最重要的一件事是什么？').fill('完成期末复习');
+  await page.getByRole('button',{name:'保存周复盘与下周重点',exact:true}).click();
+  await expect(page.getByText('周复盘与下周重点已保存',{exact:true})).toBeVisible();
+  await page.reload();await expect(page.getByLabel('下周最重要的一件事是什么？')).toHaveValue('完成期末复习');
+  await page.getByRole('link',{name:'每日',exact:true}).click();await expect(page.getByRole('heading',{name:'每日小结',exact:true})).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
 test('Data reads legacy guitar input under the production subpath', async ({page}) => {
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.addInitScript(()=>localStorage.setItem('action-cloud',JSON.stringify({url:'',key:''})));

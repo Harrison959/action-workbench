@@ -46,6 +46,15 @@ test("Postgres migration retains data, RLS isolation and CAS, and admits new kin
     const before = (await pg.query("select * from public.action_records")).rows;
     await pg.exec(migration);
     await pg.exec(migration);
+    const weeklyMigration = await readFile(
+      new URL(
+        "../supabase/migrations/202610040001_weekly_review.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    await pg.exec(weeklyMigration);
+    await pg.exec(weeklyMigration);
     assert.deepEqual(
       (await pg.query("select * from public.action_records")).rows,
       before,

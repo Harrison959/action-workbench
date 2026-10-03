@@ -102,15 +102,17 @@ export async function sync() {
       status(
         result.conflicts
           ? "有记录冲突 · 请到设置处理"
-          : result.projectUpgrade
-            ? "项目已保存在本机 · 云端项目功能待升级"
-            : result.pending
-              ? "有更改待同步"
-              : "已同步 · " +
-                new Date().toLocaleTimeString("zh-CN", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
+          : result.weeklyUpgrade
+            ? "周复盘已保存在本机 · 云端周复盘功能待升级"
+            : result.projectUpgrade
+              ? "项目已保存在本机 · 云端项目功能待升级"
+              : result.pending
+                ? "有更改待同步"
+                : "已同步 · " +
+                  new Date().toLocaleTimeString("zh-CN", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
       );
     } catch (err) {
       status("同步未完成 · " + (err.message || "请检查网络"));

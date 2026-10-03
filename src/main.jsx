@@ -1,4 +1,5 @@
 import { Today } from "./features/today/Today";
+import { Review } from "./features/review/Review";
 import { CommandCenter } from "./features/command/CommandCenter";
 import { Projects } from "./features/projects/Projects";
 import React, { useState, useEffect, useCallback } from "react";
@@ -14,7 +15,6 @@ import {
   Goals,
   Inbox,
   Schedule,
-  Summary,
   Plan,
   Cover,
 } from "./pages/CorePages";
@@ -42,7 +42,7 @@ const pageMap = {
   today: Today,
   projects: Projects,
   calendar: Schedule,
-  review: Summary,
+  review: Review,
   data: Data,
   tasks: Tasks,
   focus: Focus,

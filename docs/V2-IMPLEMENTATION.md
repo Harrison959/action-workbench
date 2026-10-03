@@ -213,3 +213,37 @@ latest 使用睡眠 wake 或情绪 date+time；同一日存在缺时间的候选
 - npm run test:production：4 项通过，新增在 /action-workbench/ 下从原吉他表单录入、Data 读取、刷新及返回原记录的测试。
 
 未验证真实 Supabase 往返和 Android 真机。此阶段没有新 kind 或同步协议变化，现有离线应用壳、附件二进制不同步和 APK 签名边界不变。缺时间旧身体记录无法还原实际先后；缺失或非法值不等于零。未进入 5C、自定义 Tracker、Weekly Review 或 Insight。
+
+## Phase 6：Weekly Review（2026-10-04）
+
+基于 main 的 dac4773 实施。本阶段为事实汇总、人工复盘与下周重点确认，停止于 Phase 6。复盘入口增加每日/每周，旧 Summary 表单、summary record、通知别名和 Command Center 写每日小结仍复用原实现。每周路由为 #review?view=weekly&week=YYYY-MM-DD，任一日期归一化为周一；默认本周，支持上周与历史周。
+
+### 统一周期与事实口径
+
+- Asia/Shanghai 自然周：周一 00:00 至周日 23:59，所有模块共用 start/end。带时区时间转换为北京时间；无时区本地 datetime 按 +08:00；日期范围包含两端。
+- 计划任务按当前 task.date 落在周内、未删除且非 cancelled；本周完成按 status=done 且 completedAt 落周内。完成任务可包含跨周/未排期任务，单独标注；计划完成率和 Top 3 完成数只取本周计划与本周实际完成的交集。缺完成日期不猜测，提示数量。改期、重开或更改重点后历史按当前记录重算，不是假定的不可变计划快照。
+- 项目活动：本周关联任务完成、新增 projectNote.createdAt、仍保留的 project.completedAt（completed/archived）。不使用 updatedAt 推断状态变化或沟通；笔记编辑不当作新增。只显示有效显式 nextAction，不自动建议。总关联任务进度和状态显示当前值，历史周不还原当时状态。
+- 当前 active 项目在所选周无上述活动显示未见记录；项目已知创建/开始时间不晚于参考日才参与，未知时间只支持本周无记录判断，不推断七天停滞。最近七天以所选周末与今天较早者为参考日，明确区间；新项目不足七天不标七天无推进。
+- Focus 无会话历史，周总量为 null，界面显示无法精确统计。另列本周完成任务 actualMinutes 的累计值及覆盖任务数，明确可能跨周、不等于本周投入；不读取当前 focus.elapsed 伪造历史。
+- 学习/英语/运动/吉他、平均睡眠、体重、情绪、公众号收入复用 createTrackerReader；周总量和记录日数来自统一 Reader，不重写 Adapter。英语仅 episode+reading；专业课不叠加 Focus。所有缺失保持 null，明确 0 可统计；没有运动记录不能称为运动零分钟。
+- 睡眠平均只对有效日值计算，并显示 recordedDays/7。体重取周内首末有效日，至少两个不同日期且首末无同日先后歧义才计算变化。情绪显示有效记录条数、天数和最后状态/强度，不平均不同情绪方向。
+- 收入继续以 income.cents 为来源，显示已录公众号收入及覆盖天数。Sales 直接读取 client.added 和 deal.date：成交数为唯一 clientId 数、销售金额为有效整数 cents 合计；成交记录数量和缺金额情况另列。跟进仅统计本周完成且带 clientId 的任务，不称为完整客户沟通次数。公众号和销售分项，不相加。
+- 自动提示仅陈述记录数、完成数、缺失覆盖情况，没有 AI、建议、因果分析或任务修改。
+
+### 保存和兼容
+
+新增 weeklyReview kind，ID 为 weekly-review:<周一日期>；payload 只保存 weekStart/weekEnd/progress/blocker/stop/nextMain/priorityProjectIds/createdAt/updatedAt，保留未知扩展字段，不复制自动统计。下周最重要结果必填，可另选最多三个现有项目；没有项目也可保存一个重点结果。删除/待同步的已选项目保留引用并可取消，不静默移除。
+
+IndexedDB 数据库名、版本、store、scope、软删除和备份 format/version 不变；KINDS 添加 weeklyReview，使新版可导入旧备份及新备份，旧版不能导入包含新 kind 的备份。保存走原 app.save/db.put/CAS，既有业务记录不改写。同步识别 weeklyReview 对应 kind CHECK 23514，保留 dirty 并继续其他旧类型，不吞掉 payload/网络/权限错误；设置提供对应升级脚本。
+
+supabase/migrations/202610040001_weekly_review.sql 仅在事务中扩展 kind 白名单，保留原所有类型、RLS、RPC，不迁移 payload。需要在原 Supabase 项目执行，实际云端尚未执行/验证；本次仅通过 PGlite 测试。不应在已有新类型记录后执行旧脚本缩回白名单。
+
+### 验证
+
+- npm test：55 项通过，新增周边界、跨周/取消/缺完成时间、Top 3、Tracker 覆盖、体重首末歧义、分项收入/CRM、真实项目活动、部分周与七天窗口、Focus 不伪造和 payload 测试；增加周复盘备份/双端 CAS/删除恢复和旧服务器不阻断上传测试。
+- npm run test:e2e：32 项通过，8 项设备范围跳过；周复盘新增桌面/手机用例。验证周切换、历史周、人工填写、项目选择、保存刷新、非 weeklyReview 原始备份行完全未变、移动端无横向溢出和无 pageerror；Daily、命令中心、原记录模块回归通过。
+- npm run build：通过，原主包大于 500kB 警告保留。
+- npm run test:production：5 项通过，包含 Pages 子路径周复盘保存刷新及每日入口。
+- .qa/weekly-desktop.png 与 .qa/weekly-mobile.png 是测试截图，已查看手机截图；截图不提交。
+
+尚未验证真实 Supabase 双端往返、Android 真机/通知/覆盖安装。历史 Focus session、项目暂停/重开时间、完整销售沟通和过去任务计划快照无法由当前模型精确还原，页面与统计接口明确相应限制。未实施 Phase 5C 或 Phase 7。

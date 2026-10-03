@@ -7,6 +7,13 @@ export function needsProjectMigration(row, error) {
     /action_records_kind_check/.test([error.message, error.details].join(" "))
   );
 }
+export function needsWeeklyReviewMigration(row, error) {
+  return (
+    row.kind === "weeklyReview" &&
+    error?.code === "23514" &&
+    /action_records_kind_check/.test([error.message, error.details].join(" "))
+  );
+}
 export async function syncRecords(client, scope, storage) {
   let page = 0;
   const remote = [];
@@ -26,6 +33,7 @@ export async function syncRecords(client, scope, storage) {
     (r) => r.dirty && !r.conflict,
   );
   let projectUpgrade = false;
+  let weeklyUpgrade = false;
   for (const row of pending) {
     const { data, error } = await client.rpc("save_action_record", {
       p_id: row.id,
@@ -35,6 +43,10 @@ export async function syncRecords(client, scope, storage) {
       p_expected: row.version,
     });
     if (error) {
+      if (needsWeeklyReviewMigration(row, error)) {
+        weeklyUpgrade = true;
+        continue;
+      }
       if (needsProjectMigration(row, error)) {
         projectUpgrade = true;
         continue;
@@ -55,6 +67,7 @@ export async function syncRecords(client, scope, storage) {
   }
   const rows = await storage.allRows(scope);
   return {
+    ...(weeklyUpgrade ? { weeklyUpgrade: true } : {}),
     projectUpgrade,
     conflicts: rows.some((r) => r.conflict),
     pending: rows.some((r) => r.dirty),

@@ -10,7 +10,7 @@ export const STREAMS = [
 ];
 export const COURSES = ['组织与胚胎学', '免疫基础与病原生物学', '生物化学', '中药学'];
 export const GRADES = { S: '强意向 · 有信任基础', A: '有意向', B: '一般 · 犹豫中', C: '无意向', D: '已经学了', W: '未成年' };
-export const KINDS = ['task','goal','inbox','event','account','income','client','salesDaily','deal','sleep','course','study','episode','word','book','reading','workout','body','routine','guitar','emotion','summary','plan','setting','focus','project','projectNote'];
+export const KINDS = ['task','goal','inbox','event','account','income','client','salesDaily','deal','sleep','course','study','episode','word','book','reading','workout','body','routine','guitar','emotion','summary','plan','setting','focus','project','projectNote','weeklyReview'];
 export function day(d = new Date()) { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year:'numeric', month:'2-digit', day:'2-digit' }).format(d); }
 export function addDays(s, n) { const d = new Date(s + 'T12:00:00+08:00'); d.setUTCDate(d.getUTCDate() + n); return day(d); }
 export const today = () => day();

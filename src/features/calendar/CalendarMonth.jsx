@@ -1,4 +1,6 @@
 import React from "react";
+import { addDays, today } from "../../domain";
+import { Icon } from "../../ui";
 
 // An alternate date picker over the existing Calendar selection; no event mutation.
 export function CalendarMonth({ date, onSelect, events }) {
@@ -19,9 +21,34 @@ export function CalendarMonth({ date, onSelect, events }) {
   );
   return (
     <section className="calendar-month" aria-label="月历日期选择">
-      <h2>
-        {year} 年 {month} 月
-      </h2>
+      <div className="calendar-month-navigation">
+        <button
+          type="button"
+          className="icon-button"
+          aria-label="上个月"
+          onClick={() => onSelect(addDays(prefix + "-01", -1))}
+        >
+          <Icon name="ChevronLeft" />
+        </button>
+        <h2 aria-live="polite">
+          {year} 年 {month} 月
+        </h2>
+        <button
+          type="button"
+          className="icon-button"
+          aria-label="下个月"
+          onClick={() => onSelect(addDays(prefix + "-01", count))}
+        >
+          <Icon name="ChevronRight" />
+        </button>
+        <button
+          type="button"
+          className="calendar-today"
+          onClick={() => onSelect(today())}
+        >
+          今天
+        </button>
+      </div>
       <div className="calendar-weekdays" aria-hidden="true">
         {"一二三四五六日".split("").map((day) => (
           <span key={day}>{day}</span>
@@ -39,6 +66,7 @@ export function CalendarMonth({ date, onSelect, events }) {
               type="button"
               aria-label={value + (eventDates.has(value) ? " 有日程" : "")}
               aria-pressed={date === value}
+              aria-current={value === today() ? "date" : undefined}
               onClick={() => onSelect(value)}
             >
               <span>{i + 1}</span>

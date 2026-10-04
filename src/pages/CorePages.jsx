@@ -414,39 +414,19 @@ export function Goals() {
 export function Inbox() {
   const a = useApp(),
     items = a.list("inbox").filter((i) => i.status === "open");
-  const convert = (r, kind) =>
-    a.edit({
-      key: "convert:" + r.id + kind,
+  const convert = (r, kind) => {
+    const options = {
+      id: "from-inbox:" + r.id + ":" + kind,
       title: kind === "event" ? "转为日程" : "转为任务",
-      initial:
-        kind === "event"
-          ? { title: r.text, start: today() + "T14:00", fixed: true }
-          : { title: r.text, date: today(), minutes: 25 },
-      fields:
-        kind === "event"
-          ? [
-              f("title", "约定内容", { required: true }),
-              f("start", "开始时间", {
-                type: "datetime-local",
-                required: true,
-              }),
-              f("fixed", "固定约定", { type: "checkbox" }),
-            ]
-          : [
-              f("title", "任务内容", { required: true }),
-              d(),
-              n("minutes", "预计分钟", { min: 1, required: true }),
-            ],
-      save: async (v) => {
-        await a.save(
-          kind,
-          { ...v, priority: "P2", status: "open", sourceId: r.id },
-          "from-inbox:" + r.id + ":" + kind,
-        );
+      onSaved: async () => {
         await a.save("inbox", { ...r, status: "converted" }, r.id);
         a.notify("已转为" + (kind === "event" ? "日程" : "任务"));
       },
-    });
+    };
+    if (kind === "event")
+      eventEditor(a, { title: r.text, sourceId: r.id }, options);
+    else taskEditor(a, { title: r.text, sourceId: r.id }, options);
+  };
   const convertProject = (r) => {
     const id = "from-inbox:" + r.id + ":project";
     const existing = a.list("project").find((p) => p.id === id);
@@ -512,6 +492,9 @@ export function Inbox() {
             <div className="record" key={r.id}>
               <p>
                 {r.text}
+                <small className="inbox-status">
+                  {r.status === "converted" ? "已转换" : "已归档"}
+                </small>
                 {r.projectId && (
                   <>
                     <br />
@@ -603,6 +586,15 @@ export function Schedule() {
               <p>
                 {r.fixed ? "固定约定" : "可调整日程"}
                 {r.end ? " · 至 " + r.end.slice(11, 16) : ""}
+                {r.end &&
+                Number.isFinite(Date.parse(r.end)) &&
+                Date.parse(r.end) > Date.parse(r.start)
+                  ? " · " +
+                    Math.round(
+                      (Date.parse(r.end) - Date.parse(r.start)) / 60000,
+                    ) +
+                    " 分钟"
+                  : ""}
               </p>
               {r.note && <small>{r.note}</small>}
             </div>

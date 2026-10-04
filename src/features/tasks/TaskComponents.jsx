@@ -16,7 +16,7 @@ import {
   areaLabel,
 } from "../projects/model.js";
 import { openTaskFocus } from "./focus.js";
-export function taskEditor(app, row = {}) {
+export function taskEditor(app, row = {}, options = {}) {
   const projects = app.list("project");
   const projectOptions = [
     { value: "", label: "独立任务" },
@@ -31,8 +31,8 @@ export function taskEditor(app, row = {}) {
       label: "原关联项目（待同步或在回收站）",
     });
   app.edit({
-    key: "task:" + (row.id || (row.projectId ? "new:" + row.projectId : "new")),
-    title: row.id ? "任务详情" : "把下一步写清楚",
+    key: "task:" + (row.id || options.id || (row.projectId ? "new:" + row.projectId : "new")),
+    title: options.title || (row.id ? "任务详情" : "把下一步写清楚"),
     initial: {
       date: today(),
       priority: "P2",
@@ -106,7 +106,7 @@ export function taskEditor(app, row = {}) {
           ).length >= 3
       )
         throw new Error("当天最多选择3项重点，请先调整已有重点");
-      await app.save(
+      const saved = await app.save(
         "task",
         {
           ...v,
@@ -117,8 +117,9 @@ export function taskEditor(app, row = {}) {
               ? row.completedAt || new Date().toISOString()
               : null,
         },
-        row.id,
+        options.id || row.id,
       );
+      await options.onSaved?.(saved);
       app.notify("任务已保存");
     },
   });

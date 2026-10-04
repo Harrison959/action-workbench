@@ -1,4 +1,41 @@
 /* UI V3 Final: additive refinements over the verified Phase 9C foundation. */
+.app.v2 .calendar-month-navigation {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.app.v2 .calendar-month-navigation h2 {
+  flex: 1;
+  margin: 0;
+}
+.app.v2 .calendar-today {
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+.app.v2 .calendar-days [aria-current="date"] {
+  box-shadow: inset 0 0 0 1px var(--accent);
+  font-weight: 700;
+}
+.app.v2 .inbox-status {
+  display: block;
+  margin: 8px 0;
+  color: var(--muted);
+}
+.app.v2 .inbox-page .button-row {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.app.v2 .inbox-page .button-row .text-link {
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  min-height: 44px;
+}
 .app.v2 .project-detail .project-outcome-section {
   border: 0;
   padding: 10px 0;

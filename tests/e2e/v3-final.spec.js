@@ -13,7 +13,15 @@ async function seed(page) {
     const { put } = await import("/src/db.js");
     const { today } = await import("/src/domain.js");
     const date = today();
-    await put("projectNote", { projectId: "v3-project", text: "完成章节梳理", createdAt: new Date().toISOString() }, "v3-note");
+    await put(
+      "projectNote",
+      {
+        projectId: "v3-project",
+        text: "完成章节梳理",
+        createdAt: new Date().toISOString(),
+      },
+      "v3-note",
+    );
     await put(
       "project",
       {
@@ -108,3 +116,47 @@ test("V3 project detail preserves outcome, progress, next action and bottom life
   await expect(page.locator(".project-history")).toBeVisible();
 });
 
+test("V3 Calendar month navigation and Inbox reuse real editors", async ({
+  page,
+}) => {
+  const date = await seed(page);
+  await page.goto("/#calendar");
+  await expect(
+    page.locator('.calendar-days [aria-current="date"]'),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "上个月", exact: true }).click();
+  await expect(page.getByLabel("起始日期")).not.toHaveValue(date);
+  await page.getByRole("button", { name: "今天", exact: true }).click();
+  await expect(page.getByLabel("起始日期")).toHaveValue(date);
+  await expect(page.locator(".timeline-row")).toContainText("60 分钟");
+  await page.evaluate(async () => {
+    const db = await import("/src/db.js");
+    await db.put(
+      "inbox",
+      {
+        text: "整理课堂内容",
+        status: "open",
+        date: new Date().toISOString().slice(0, 10),
+      },
+      "v3-inbox",
+    );
+  });
+  await page.goto("/#inbox");
+  await page.getByRole("button", { name: "转为任务", exact: true }).click();
+  await expect(
+    page.getByRole("combobox", { name: "关联项目", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("combobox", { name: "关联项目", exact: true })
+    .selectOption("v3-project");
+  await page.locator('dialog button[type="submit"]').click();
+  await expect(
+    page.getByRole("button", { name: "转为任务", exact: true }),
+  ).toHaveCount(0);
+  const saved = await page.evaluate(async () =>
+    (await (await import("/src/db.js")).records()).find(
+      (r) => r.kind === "task" && r.sourceId === "v3-inbox",
+    ),
+  );
+  expect(saved.projectId).toBe("v3-project");
+});

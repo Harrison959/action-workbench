@@ -1,9 +1,9 @@
 import { textField as f, noteField as note } from "../../ui";
 import { today } from "../../domain";
-export function eventEditor(a, r = {}) {
+export function eventEditor(a, r = {}, options = {}) {
   a.edit({
-    key: "event:" + (r.id || "new"),
-    title: "安排一个约定",
+    key: "event:" + (r.id || options.id || "new"),
+    title: options.title || "安排一个约定",
     initial: { start: today() + "T14:00", fixed: true, ...r },
     fields: [
       f("title", "约定内容", { required: true, wide: true }),
@@ -14,7 +14,8 @@ export function eventEditor(a, r = {}) {
     ],
     save: async (v) => {
       if (v.end && v.end <= v.start) throw new Error("结束时间应晚于开始时间");
-      await a.save("event", v, r.id);
+      const saved = await a.save("event", v, options.id || r.id);
+      await options.onSaved?.(saved);
       a.notify("日程已保存");
     },
   });

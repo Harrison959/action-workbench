@@ -247,3 +247,48 @@ supabase/migrations/202610040001_weekly_review.sql 仅在事务中扩展 kind �
 - .qa/weekly-desktop.png 与 .qa/weekly-mobile.png 是测试截图，已查看手机截图；截图不提交。
 
 尚未验证真实 Supabase 双端往返、Android 真机/通知/覆盖安装。历史 Focus session、项目暂停/重开时间、完整销售沟通和过去任务计划快照无法由当前模型精确还原，页面与统计接口明确相应限制。未实施 Phase 5C 或 Phase 7。
+
+## Phase 5C：统一记录入口（2026-10-04）
+
+基于 main 的 75c03be 实施。Data 每行提供轻量「+ 记录」按钮，指标名称仍链接原业务页面，折叠历史与 7/30 天读取保持原实现。只统一入口，旧业务 record 仍为唯一数据来源。没有新增 kind、trackerEntry、SQL migration、IndexedDB 升级、双写或历史迁移；没有自定义 Tracker、AI、Insight，也没有修改 Today / Projects / Weekly Review 的流程。
+
+### 入口与编辑器复用
+
+| 指标 / sourceKey | 记录动作 | 唯一写入 kind |
+| --- | --- | --- |
+| sleep.duration | 在 Data 打开原完整睡眠编辑器；当天已有记录则编辑该记录 | sleep |
+| body.weight / height / waist / arm / shoulder | 共用原身体测量编辑器，支持一次填写多项 | body |
+| workout.minutes | 在 Data 打开原训练编辑器 | workout |
+| study.minutes | 在 Data 打开原复习编辑器，科目可选；课程页面仍按当前科目预填 | study |
+| english.minutes | 跳转原 English 页，通过老友记 / 英文阅读 / 单词表达入口记录 | episode / reading / word |
+| guitar.minutes | 在 Data 打开原练琴编辑器 | guitar |
+| emotion.intensity | 在 Data 打开原情绪编辑器，保留状态与完整上下文 | emotion |
+| income.amount | 跳转原 Income 的「记收入」页，按账号填写金额 | income |
+
+src/features/records/editors.js 小范围提取原 openRecord 与六类表单；旧页面和 Data 共用同一函数、FormDialog、草稿键、校验、app.save 和保存通知，没有复制表单。src/features/trackers/recording.js 只分发入口，不写存储、不调用 Adapter 反向生成数据。保存完成沿用现有 db.subscribe → app.rows → createTrackerReader 重算，无需刷新。
+
+睡眠继续使用上床、估计入睡、最终醒来、实际起床、夜醒次数与清醒分钟，通过原 sleepMinutes 扣除夜醒并校验醒来日期、同日重复。重复点击当天记录进入编辑，不重复新增。其他允许多条记录的业务仍为新增入口。
+
+### 真实字段与边界
+
+- 身体字段为 height/weight/waist/arm/shoulder，当前没有体脂、臀围或测量时刻字段；未补造字段或改变 latest 口径。
+- 训练用 exercises 文本保存动作、组数、次数和重量，并保留 feeling/discomfort/note，没有扁平化为分钟记录。
+- 学习保留 subject/topic/minutes/questions/correct/wrong/material/next；课程与考试安排仍在 Courses 页。
+- 吉他保留 content/song/minutes/bpm/difficulty/next/note；录音添加、更换与播放继续在原 Guitar 记录行，编辑保留 attachmentId/attachmentName 和未知扩展字段，二进制仍只在本设备。
+- 情绪实际为 mood + intensity（1–5），上下文为 trigger/behavior/adjustment/result，不改为文档示例的 1–10 或仅 intensity。
+- 英语时长仍只取 episode.minutes + reading.minutes；word 不产生时长。阅读继续关联 book、页码与完整校验，新书管理留原页面。
+- 收入金额仍为整数 income.cents，保留 accountId/track/date/enteredAt，按账号与日期的原 ID 保存。没有账号时继续引导添加账号，不写来源不明的金额。
+
+本次未扩展 Command Center 或 Add Menu；Data 已提供全部系统指标的记录入口。Sales、原业务页面的其余功能、通知及同步协议保持现状。
+
+### 验证
+
+- npm test：55 项通过，含既有 IndexedDB、导入导出、模拟双端 CAS、Supabase SQL/RLS 和 Tracker 只读测试。
+- npm run test:e2e：38 项通过，8 项按设备范围跳过。新增三组测试各在桌面/手机执行，覆盖全部八类入口、四个次级身体指标共用表单、夜醒计算与同日编辑、学习校验、同日多次吉他汇总、完整旧字段、情绪方向、英语三种来源、收入账号与赛道、刷新、备份跨 scope 导入、旧扩展字段和录音引用保留、无 pageerror 与无横向溢出。已有导航、移动 Add Menu、Command Center、Today、Projects、Weekly Review 回归通过。
+- npm run build：通过；保留已有主包超过 500kB 警告。
+- npm run test:production：6 项通过，新增 Pages 子路径直接从 Data 录入、即时读取、刷新和返回原吉他详情，检查资源请求与 pageerror。
+- 查看 .qa/data-recording-mobile.png，维持列表布局；QA 文件不提交。
+
+首次同时运行 E2E 与 production 时，两个既有 Command Center 用例在初始 page.goto 等待 load 阶段超时；随后单独重跑完整 npm run test:e2e，38 项全部通过、8 项设备范围跳过。未修改命令中心或放宽断言；该次加载超时仍作为测试环境稳定性边界记录。
+
+尚未验证真实 Supabase 双端往返、Android 真机录入/通知/覆盖安装。本阶段不改变 schema 或同步协议，不需要执行新的数据库脚本。英语来源选择、书籍管理、按账号收入录入、吉他录音附件和训练计划继续通过原页面完成。停止于 Phase 5C，未进入 Phase 7。

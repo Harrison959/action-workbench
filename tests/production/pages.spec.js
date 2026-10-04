@@ -1,5 +1,30 @@
 import { test, expect } from "@playwright/test";
 
+test("Data recording reuses the guitar editor on the built Pages subpath", async ({ page }) => {
+  const errors = [], missing = [];
+  page.on("pageerror", e => errors.push(e.message));
+  page.on("response", r => {
+    if (r.status() >= 400 && r.url().startsWith("http://127.0.0.1:4176")) missing.push(r.url());
+  });
+  await page.addInitScript(() => localStorage.setItem("action-cloud", JSON.stringify({url:"",key:""})));
+  await page.goto("./#data");
+  await page.getByRole("button", { name: "记录吉他练习时长", exact: true }).click();
+  await expect(page).toHaveURL(/\/action-workbench\/#data$/);
+  await page.getByLabel("练习内容").fill("Data 子路径练习");
+  await page.getByLabel("曲目 / 对比片段").fill("测试片段");
+  await page.getByLabel("练习分钟").fill("25");
+  await page.getByLabel("节拍速度 BPM").fill("80");
+  await page.getByRole("button", { name: "保存记录", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.locator('[data-tracker="guitar.minutes"] .tracker-value')).toHaveText("25 分钟");
+  await page.reload();
+  await expect(page.locator('[data-tracker="guitar.minutes"] .tracker-value')).toHaveText("25 分钟");
+  await page.getByLabel("打开吉他练习时长原始记录").click();
+  await expect(page.getByRole("heading", { name: "Data 子路径练习 / 测试片段", exact: true })).toBeVisible();
+  expect(errors).toEqual([]);
+  expect(missing).toEqual([]);
+});
+
 test('Weekly Review saves and refreshes under the Pages subpath while Daily remains accessible',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.addInitScript(()=>localStorage.setItem('action-cloud',JSON.stringify({url:'',key:''})));

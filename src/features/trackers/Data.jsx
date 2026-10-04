@@ -4,29 +4,35 @@ import { today, addDays } from "../../domain";
 import { TRACKERS } from "./definitions";
 import { createTrackerReader } from "./selectors";
 import { formatMetric } from "./metrics";
+import { recordMetric } from "./recording";
 import "./trackers.css";
 
-function MetricRow({ definition: def, reader, date, days }) {
+function MetricRow({ definition: def, reader, date, days, onRecord }) {
   const value = reader.getDailyValue(def.id, date);
   const start = addDays(date, 1 - days);
   const average = reader.getAverage(def.id, start, date);
   return (
     <li className="tracker-row" data-tracker={def.id}>
       <div className="tracker-line">
-        <Link to={def.route} className="tracker-name">
+        <Link
+          to={def.route}
+          className="tracker-name"
+          aria-label={"打开" + def.name + "原始记录"}
+        >
           {def.name}
         </Link>
         <strong className="tracker-value">
           {def.type === "money" && !value.missing ? "已录 " : ""}
           {formatMetric(def, value.value)}
         </strong>
-        <Link
-          to={def.route}
+        <button
+          type="button"
           className="text-link"
-          aria-label={"打开" + def.name + "原始记录"}
+          aria-label={"记录" + def.name}
+          onClick={() => onRecord(def)}
         >
-          记录 →
-        </Link>
+          + 记录
+        </button>
       </div>
       {value.selected?.label && (
         <p className="tracker-context">
@@ -99,13 +105,14 @@ export function Data() {
       reader={reader}
       date={date}
       days={days}
+      onRecord={(definition) => recordMetric(app, definition)}
     />
   );
   return (
     <div className="tracker-data">
       <PageHead
         title="数据"
-        description="查看已有记录，进入原页面补记。未记录不按零计算。"
+        description="点击记录补记，点击指标名查看原始详情。未记录不按零计算。"
       />
       <div className="tracker-toolbar">
         <h2>

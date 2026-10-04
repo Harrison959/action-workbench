@@ -434,3 +434,170 @@
   color: var(--text);
   font: 12px/1.6 monospace;
 }
+/* Phase 8: common controls and long-content safety, without changing page layouts. */
+.v2 :is(h1, h2, h3, p, small, li, blockquote, .menu-row span, .plan-task span) {
+  overflow-wrap: anywhere;
+}
+.v2
+  :is(
+    .page-head > div,
+    .section-head > div,
+    .timeline-row > div,
+    .menu-row > span,
+    .client-title > div,
+    .income-row > label
+  ) {
+  min-width: 0;
+}
+.v2
+  :is(.menu-row, .button-row, .focus-actions, .income-footer, .comparison-row) {
+  flex-wrap: wrap;
+}
+.v2 :is(input, select, textarea) {
+  min-width: 0;
+  max-width: 100%;
+}
+.v2 :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+.v2 .section-head h2 {
+  font-size: 19px;
+}
+.v2 .stats {
+  background: transparent;
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+}
+.v2 .stat {
+  padding: 16px 20px;
+}
+.v2 .emotion-note {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 12px 0 20px;
+}
+.v2 .focus-page {
+  background: var(--bg);
+}
+.v2 .focus-page > .eyebrow {
+  display: none;
+}
+.v2 .dialog {
+  overflow-y: auto;
+  max-height: calc(100dvh - 24px);
+}
+.v2 .dialog-top {
+  padding: 18px 22px;
+  gap: 12px;
+  align-items: start;
+}
+.v2 .dialog-top h2 {
+  font-size: 21px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.v2 .dialog-top > div {
+  min-width: 0;
+}
+.v2 .dialog :is(input, select, textarea) {
+  scroll-margin-block: 90px;
+}
+.v2 .form-fields {
+  padding: 20px 22px 8px;
+}
+.v2 .form-footer {
+  padding: 14px 22px;
+}
+.v2 .toast {
+  overflow-wrap: anywhere;
+}
+.mobile-page-links {
+  display: none;
+}
+@media (max-width: 760px) {
+  .mobile-page-links {
+    display: block;
+    margin-bottom: 20px;
+  }
+  .v2 :is(.icon-button, .check) {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+  .v2
+    :is(
+      .button.small,
+      .text-link,
+      .task-project,
+      .project-back,
+      .file-button,
+      summary
+    ) {
+    min-height: 44px;
+  }
+  .v2 summary {
+    padding-block: 12px;
+    cursor: pointer;
+  }
+  .v2 .topbar-actions > button[aria-label="添加"],
+  .v2 .topbar-actions > .avatar {
+    display: none;
+  }
+  .v2 .filter-row > label {
+    flex-wrap: wrap;
+  }
+  .v2 .row-actions {
+    flex-direction: column;
+  }
+  .v2 .task-row {
+    gap: 8px;
+  }
+  .v2 .form-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .v2 .form-footer {
+    flex-wrap: wrap;
+  }
+  .v2 .dialog {
+    width: calc(100% - 20px);
+  }
+  .v2 .timer {
+    font-size: clamp(64px, 21vw, 110px);
+  }
+  .v2 .focus-back {
+    left: 20px;
+    min-height: 44px;
+  }
+  .v2 .focus-page {
+    padding: 90px 20px 30px;
+  }
+  .v2 .income-row {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .v2 .income-row .money-input {
+    width: min(140px, 100%);
+  }
+  .v2 .stat {
+    padding: 12px;
+  }
+  .v2 .toast {
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+  .v2 .timeline-row {
+    gap: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2 *,
+  .v2 *::before,
+  .v2 *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

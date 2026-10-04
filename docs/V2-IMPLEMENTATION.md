@@ -346,3 +346,57 @@ src/features/insights/selectors.js 建立 scope 内的只读计算上下文：�
 - 已查看 .qa/insights-mobile.png，保持文本列表，无警报配色或卡片墙。QA 图片不提交。
 
 未验证真实 Supabase 双端、Android 真机与覆盖安装；本阶段不变更云端／本机存储结构。现有历史限制仍包括 Focus session、项目状态完整历史、任务计划快照、完整销售沟通。规则均不补造这些数据，不预测未来，不做因果、心理或医疗判断。止于规则型 Insight，不进入 AI Insight 或后续 UI 大重构。
+
+## Phase 8：Polish / Product Hardening（2026-10-04）
+
+基于 main 的 d5fe630 实施。对核心页面和旧业务页面做公共控件、空状态、异常处理、移动布局、首次加载和真实路径验收；保留全部业务页面。没有新增业务模块、一级导航、Tracker 类型、Insight 规则、AI、record kind、数据库版本、SQL migration 或同步协议。本次为本地开发结果，尚未提交或推送。
+
+### 页面和交互检查
+
+检查 Today、Projects / Detail、Tasks、Focus、Calendar、Daily / Weekly Review、Insights、Data、Inbox、More 及 Income / Sales / Sleep / Courses / English / Fitness / Guitar / Emotion。现有 V2 已通过 CSS 隐藏多数英文 eyebrow；本次清掉 CorePages 的装饰英文和共享表单 MAKE IT CONCRETE，收敛任务、收件箱、复盘说明，训练与情绪等旧页使用更直接的标题。封面、英语单词和吉他 BPM 等有实际用途的内容保留。
+
+- 通过 v2.css 统一 section 标题、表单标题、间距、列表控件和 focus-visible，降低旧 Stats 面板、情绪说明及 Focus 渐变的装饰感；保留收入/销售统计、课程安排、训练计划等独特布局。
+- 移动端 completion、播放、编辑、归档等图标操作使用 44px 点击区域；轻量链接、小按钮和 details summary 也保留触摸高度。长中文与连续英文可换行，记录操作纵向排列，收入行允许折行。
+- 共享 FormDialog 使用保存中的同步锁，阻止重复提交、Esc/背景关闭，禁用 checkbox 与关闭按钮；保存失败聚焦可读的 alert 并保留输入/草稿。sessionStorage 清草稿失败不再使已保存记录被误报为失败。关闭现有表单后恢复仍存在的原入口焦点。
+- Tabs 采用选中项 roving tabIndex，支持左右、Home/End；Command Center 对懒加载路由等待可见标题后恢复目标焦点，观察器在完成或路由改变后清理。
+- 本机首次读库失败显示可重试状态。路由内部 ErrorBoundary 包住 Suspense，异步页面载入失败提供重新打开/返回今天，保留外壳和已有记录；不自动重试或清除存储。
+- Today、Daily 和 Weekly 的未安排重点不再显示 0/0；Calendar、Inbox 空状态说明录入或整理入口。Data 保留「未记录」和每行记录按钮，Insights 空状态说明补充数据。旧收入明细对缺失/无效金额显示未记录/金额无效，不输出 NaN。
+
+### 导航收口
+
+桌面 More 移除日历、收件箱、数据的重复列表入口，继续使用七项主导航；手机底部没有这三项，因此 More 的手机专用区域保留入口。手机顶栏隐藏重复添加和更多头像入口，底部 Add / More 保留。数据记录仍在 Data 行调用既有 editor，英语与公众号收入仍到原页面。Command Center 和 Add Menu 分别服务键盘与触屏，复用 task/project/event/capture 操作，未增加第二套表单。
+
+### 边界和只读统计
+
+旧模块日期筛选、图表标签及销售首次接触/成交日期处理缺日期时不再抛异常。Income 月汇总排除删除、缺失金额和非法金额，接受已有数字/数字字符串；赛道金额以数字累加，避免历史字符串拼接，赛道索引避免原型键冲突。money 格式化区分缺失、无效和明确零。Chart 将非有限数值留作空点，并使用唯一索引键。
+
+Sleep 的近七天日均复用 createTrackerReader，使用有效日值和 recordedDays，排除未来/非法指标，不再对同日多条原始记录直接求平均。旧睡眠日记仍保留原记录，时长无效时明确缺失。Daily 计划任务不计 cancelled；其余 Today / Weekly / Tracker / Insight 的取消、删除、暂停、归档、同日多条、跨午夜/周/月口径沿用已有 selectors 与测试。未批量改写历史 payload，备份前后逐行相等。
+
+### 性能
+
+先用临时 build sourcemap 检查构成。旧主包 1,363.18 kB（gzip 374.48 kB），source-map 中最大的来源为 lucide-react（约 1.45MB 未压缩源码）、React DOM 和 Supabase；体积分析不是精确 minified 包归属，不将源码占比冒充压缩后占比。
+
+- 将动态整个 lucide-react namespace 替换为 41 个当前使用图标的显式 import registry，可正常 tree-shake；未来新增图标需加入此 registry。
+- Today 静态保留；Projects、Review、Insights、Data、More、Settings、CorePages、Workstreams 用 React.lazy 按路由加载。同一旧文件导出的页面共用一个小 chunk，没有为拆文件重写旧页面。
+- eventEditor 小范围提取为 features/calendar/editor.js；Today / Add Menu / Command Center 不再通过 CorePages 引入整组页面。CorePages 保留兼容 re-export。
+- 正常 build 的主包 513.40 kB（gzip 151.93 kB），较旧主包下降 62.3%；共享 domain chunk 4.69 kB。主要懒加载块：Projects 10.84kB、Review 11.14kB、Insights 主入口 0.96kB + 共用统计/列表、Data 3.69kB + 共用编辑器、Settings 12.96kB、CorePages 17.36kB、Workstreams 30.22kB。
+- 仍有 >500kB 警告，主包保留 React / React DOM、Supabase 同步客户端、Capacitor 基础和必要共享操作。没有隐藏警告、设置任意 vendor 切分或改同步初始化时序。生产测试确认 Today 首开没有请求以上次级页面 JS chunks。
+
+### 验证
+
+- npm test：70 项通过；含旧备份、IndexedDB、模拟双端 CAS、SQL/RLS、取消/软删除、跨日期、Tracker 与规则边界。新增无日期与无效金额只读回归。
+- npm run test:e2e：50 项通过，8 项按设备范围跳过。新增四个场景分别跑桌面 / Pixel 7：真实一天、360px 全页面长文本/空数据、旧非法记录只读、共享表单/草稿/存储配额失败/键盘行为。真实一天覆盖任务 Top 3、Focus 结果、Project 和任务关联、Data 身体/专业课、Inbox、人工周复盘、Insights、刷新后全部原 kind 存在。
+- 360px 场景遍历所有目标页，长任务/项目/客户/课程资料/Insight/周复盘不产生横向溢出；360px 高度下测量表单可滚动、可保存。这是视口缩小模拟，未冒充真实 Android 输入法弹起测试。
+- npm run build：通过；保留上述 500kB 提示。
+- npm run test:production：9 项通过。检查 /action-workbench/ 的 hash 路由、逐页刷新、资源请求、lazy chunk 子路径、已保存记录、命令中心。新增阻断 Projects chunk 的场景，验证页内错误返回 Today 后原 Inbox 数据仍存在。正常生产路径没有 pageerror 或静态资源失败。
+- npm run android:sync：通过。最终 dist 复制进 Android public，四个既有 Capacitor 插件成功同步，包括 local-notifications。通知实现、native 配置和插件版本未修改。
+- 已查看最新 More、Data、Weekly 手机 QA 截图。QA 截图、dist、Android 生成 assets 不提交。
+- 检查既有 CI：main d5fe630 的 web-build、publish-web、android-debug-apk 已成功；本阶段尚未 push，不能将这些旧提交的结果称为当前改动的远端 CI 结果。现有 workflow 会继续执行单元/E2E/production/build 及 Android sync / APK 构建。
+
+### 保留边界与使用结论
+
+没有为了少量体积改同步协议、Supabase 初始化或大范围拆解旧组件；CorePages 与 Workstreams 内的页面仍共享 chunk。旧业务提示与封面没有完全统一成相同布局。历史 Focus session、项目状态快照、完整销售沟通、过去计划仍受旧模型限制。
+
+真实 Supabase 双端往返、Android 真机/通知权限/覆盖安装/键盘尚未验收。本机未找到 Java 和 Android SDK，因此未运行 assembleDebug，不将 cap sync 当作原生 APK 构建通过。现仓库没有 Web manifest / service worker；离线 IndexedDB 录入保持可用，Web 冷启动或首次访问未缓存路由的离线可用性没有承诺，缺 chunk 会显示恢复入口。Android 安装包的 dist assets 包含各路由 chunk。
+
+当前 Web V2 核心闭环已经具备个人长期日常使用基础；全端正式验收仍需真实云同步往返及 Android 真机测试。没有进入下一阶段或新增功能。

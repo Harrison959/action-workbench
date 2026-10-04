@@ -1,6 +1,5 @@
 import React from "react";
 import { PageHead, Section, Link, Icon } from "../ui";
-export { Data } from "../features/trackers/Data";
 
 function Menu({ items }) {
   return (
@@ -22,10 +21,9 @@ export function More() {
   return (
     <>
       <PageHead title="更多" />
-      <Section title="安排与记录">
+      <div className="mobile-page-links">
         <Menu
           items={[
-            ["tasks", "全部任务", "查看、修改和整理任务", "ListTodo"],
             ["calendar", "日历", "固定日程与时间安排", "CalendarDays"],
             ["inbox", "收件箱", "处理快速记录", "Inbox"],
             [
@@ -34,10 +32,23 @@ export function More() {
               "收入、学习、健康与生活记录",
               "ChartNoAxesCombined",
             ],
+          ]}
+        />
+      </div>
+      <Section title="安排与记录">
+        <Menu
+          items={[
+            ["tasks", "全部任务", "查看、修改和整理任务", "ListTodo"],
+
             ["plan", "提前安排", "选择每天的重点", "ListChecks"],
             ["goals", "目标", "月度、季度与长期目标", "Target"],
             ["sales", "销售", "客户、跟进与成交记录", "Users"],
-            ["insights", "值得注意", "查看少量事实变化及规则依据", "ListFilter"],
+            [
+              "insights",
+              "值得注意",
+              "查看少量事实变化及规则依据",
+              "ListFilter",
+            ],
             ["projects?status=archived", "已归档项目", "", "Archive"],
           ]}
         />

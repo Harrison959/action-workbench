@@ -1,3 +1,5 @@
+import { eventEditor } from "../features/calendar/editor";
+export { eventEditor } from "../features/calendar/editor";
 import React, { useEffect, useState } from "react";
 import {
   useApp,
@@ -47,9 +49,8 @@ export function Tasks() {
   return (
     <>
       <PageHead
-        eyebrow="LESS THINKING, MORE DOING"
         title="任务"
-        description="下一步足够具体，开始就容易一点。"
+        description="查看、筛选和安排任务。"
         action={
           <Button icon="Plus" onClick={() => taskEditor(a)}>
             新建任务
@@ -143,11 +144,11 @@ export function Focus() {
         <Icon name="ArrowLeft" />
         返回工作台
       </Link>
-      <span className="eyebrow">ONE THING AT A TIME</span>
+
       <h1>{task?.title || "选一件事，全心投入。"}</h1>
       {task ? (
         <>
-          <p className="muted">{task.note || "这一段时间，只留给眼前的事。"}</p>
+          <p className="muted">{task.note || "按预估时长计时，可随时暂停。"}</p>
           <div
             className={"timer " + (foc?.running ? "running" : "")}
             aria-live="off"
@@ -305,7 +306,6 @@ export function Goals() {
   return (
     <>
       <PageHead
-        eyebrow="KEEP YOUR DIRECTION"
         title="目标"
         description="目标给方向，任务负责下一步。"
         action={
@@ -428,9 +428,8 @@ export function Inbox() {
   return (
     <>
       <PageHead
-        eyebrow="CAPTURE FIRST, SORT LATER"
         title="收件箱"
-        description="先卸下脑中的念头，再给它们一个去处。"
+        description="快速记录后，可转为任务、项目或日程。"
         action={
           <Button onClick={a.capture} icon="Plus">
             快速记录
@@ -439,6 +438,7 @@ export function Inbox() {
       />
       <RecordList
         rows={items}
+        empty="点击上方「快速记录」留下想法，再整理为任务或项目。"
         onRemove={a.remove}
         render={(r) => (
           <>
@@ -496,25 +496,6 @@ export function Inbox() {
     </>
   );
 }
-export function eventEditor(a, r = {}) {
-  a.edit({
-    key: "event:" + (r.id || "new"),
-    title: "安排一个约定",
-    initial: { start: today() + "T14:00", fixed: true, ...r },
-    fields: [
-      f("title", "约定内容", { required: true, wide: true }),
-      f("start", "开始", { type: "datetime-local", required: true }),
-      f("end", "结束", { type: "datetime-local" }),
-      f("fixed", "固定约定，不随睡眠建议自动移动", { type: "checkbox" }),
-      note(),
-    ],
-    save: async (v) => {
-      if (v.end && v.end <= v.start) throw new Error("结束时间应晚于开始时间");
-      await a.save("event", v, r.id);
-      a.notify("日程已保存");
-    },
-  });
-}
 export function Schedule() {
   const a = useApp(),
     [date, setDate] = useState(today()),
@@ -528,13 +509,16 @@ export function Schedule() {
   const entries = a
     .list("event")
     .filter(
+      (e) =>
+        typeof e.start === "string" && Number.isFinite(Date.parse(e.start)),
+    )
+    .filter(
       (e) => e.start?.slice(0, 10) >= date && e.start?.slice(0, 10) <= end,
     )
     .sort((x, y) => x.start.localeCompare(y.start));
   return (
     <>
       <PageHead
-        eyebrow="MAKE ROOM FOR WHAT MATTERS"
         title="日程"
         description="约定的时间固定，其他任务留有余地。"
         action={
@@ -548,12 +532,15 @@ export function Schedule() {
           type="date"
           aria-label="起始日期"
           value={date}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={(e) => {
+            if (e.target.value) setDate(e.target.value);
+          }}
         />
         <Tabs items={["日", "周", "月"]} value={view} onChange={setView} />
       </div>
       <RecordList
         rows={entries}
+        empty="这段时间没有日程。点击「添加日程」记录固定安排。"
         edit={(r) => eventEditor(a, r)}
         onRemove={a.remove}
         render={(r) => (
@@ -594,7 +581,9 @@ export function Summary() {
   useEffect(() => {
     setValues(r || {});
   }, [date, r?.id]);
-  const tasks = a.list("task").filter((t) => t.date === date),
+  const tasks = a
+      .list("task")
+      .filter((t) => t.date === date && t.status !== "cancelled"),
     rev = sum(
       a.list("income").filter((i) => i.date === date),
       "cents",
@@ -603,16 +592,17 @@ export function Summary() {
   return (
     <>
       <PageHead
-        eyebrow="REFLECT, THEN MOVE FORWARD"
         title="每日小结"
-        description="看清今天，明天就少一点犹豫。"
+        description="回顾今天的记录，填写推进、阻碍和调整。"
         action={
           <input
             aria-label="小结日期"
             type="date"
             value={date}
             max={today()}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value) setDate(e.target.value);
+            }}
           />
         }
       />
@@ -620,14 +610,21 @@ export function Summary() {
         items={[
           [
             "任务完成",
-            `${tasks.filter((t) => t.status === "done").length} / ${tasks.length}`,
+            tasks.length
+              ? `${tasks.filter((t) => t.status === "done").length} / ${tasks.length}`
+              : "未安排任务",
           ],
-          ["公众号收入", money(rev)],
-          ["销售收入", money(sum(deals, "cents"))],
+          [
+            "公众号收入",
+            a.list("income").some((i) => i.date === date)
+              ? money(rev)
+              : "未记录",
+          ],
+          ["销售收入", deals.length ? money(sum(deals, "cents")) : "未记录"],
         ]}
       />
       <div className="two-col">
-        <Section title="今天留下的足迹" label="FROM YOUR RECORDS">
+        <Section title="今天留下的足迹">
           {tasks.length ? (
             tasks.map((t) => <TaskRow key={t.id} task={t} compact />)
           ) : (
@@ -653,7 +650,7 @@ export function Summary() {
             ) : null;
           })}
         </Section>
-        <Section title="留给明天的自己" label="A SMALL REFLECTION">
+        <Section title="留给明天的自己">
           <form
             onSubmit={async (e) => {
               e.preventDefault();
@@ -743,7 +740,6 @@ export function Plan() {
   return (
     <>
       <PageHead
-        eyebrow="GIVE TOMORROW A DIRECTION"
         title="提前安排"
         description="先选一到三件重点，再给其他事情留空间。"
         action={
@@ -751,15 +747,15 @@ export function Plan() {
             aria-label="计划日期"
             type="date"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value) setDate(e.target.value);
+            }}
           />
         }
       />
       <div className="plan-banner">
         <div>
-          <span className="eyebrow">
-            {confirmed ? "PLAN CONFIRMED" : "DRAFT PLAN"}
-          </span>
+          <span className="eyebrow">{confirmed ? "已确认" : "草稿"}</span>
           <h2>
             {date === today()
               ? "今天"

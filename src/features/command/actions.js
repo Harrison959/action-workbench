@@ -1,6 +1,6 @@
 import { taskEditor } from "../tasks/TaskComponents";
 import { projectEditor } from "../projects/editor";
-import { eventEditor } from "../../pages/CorePages";
+import { eventEditor } from "../calendar/editor";
 import { projectPath } from "../projects/model.js";
 import { openTaskFocus } from "../tasks/focus.js";
 export function executeCommand(item, app) {

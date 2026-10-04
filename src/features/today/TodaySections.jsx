@@ -3,7 +3,7 @@ import { Button, Link, useApp } from "../../ui";
 import { TaskRow, taskEditor } from "../tasks/TaskComponents";
 import { openTaskFocus } from "../tasks/focus";
 import { projectPath } from "../projects/model";
-import { eventEditor } from "../../pages/CorePages";
+import { eventEditor } from "../calendar/editor";
 
 export function NextAction({ action }) {
   const app = useApp(),
@@ -118,7 +118,9 @@ export function TodayTimeline({ items }) {
           ))}
         </ol>
       ) : (
-        <p className="today-empty">今天没有有明确时间的日程。</p>
+        <p className="today-empty">
+          今天没有固定安排，可通过「查看日程」添加。
+        </p>
       )}
     </section>
   );
@@ -128,10 +130,16 @@ export function TodayProgress({ tasks }) {
   return (
     <footer className="today-progress">
       <span>
-        今日完成{" "}
-        <strong>
-          {done} / {tasks.length}
-        </strong>
+        {tasks.length ? (
+          <>
+            今日完成{" "}
+            <strong>
+              {done} / {tasks.length}
+            </strong>
+          </>
+        ) : (
+          "今天尚未安排任务"
+        )}
       </span>
       <Link to="review">写每日小结 →</Link>
     </footer>

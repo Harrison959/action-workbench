@@ -22,7 +22,7 @@ export function cents(input) {
   if (!Number.isSafeInteger(n) || n > 10000000000) throw new Error('金额超出可记录范围');
   return n;
 }
-export const money = n => '¥' + ((n || 0) / 100).toLocaleString('zh-CN', {minimumFractionDigits:2,maximumFractionDigits:2});
+export const money = n => n === null || n === undefined || n === '' ? '未记录' : !Number.isFinite(Number(n)) ? '金额无效' : '¥' + (Number(n) / 100).toLocaleString('zh-CN', {minimumFractionDigits:2,maximumFractionDigits:2});
 export const sum = (rows, field) => rows.reduce((n,r) => n + (Number(r[field]) || 0), 0);
 export function dateRange(month, end = today()) {
   const start = month + '-01', next = new Date(start+'T12:00:00+08:00'); next.setUTCMonth(next.getUTCMonth()+1);
@@ -33,9 +33,9 @@ export function accountTrack(account, date) {
   return [...(account.tracks || [])].filter(t=>t.date<=date).sort((a,b)=>b.date.localeCompare(a.date))[0]?.name || account.track || '未分类';
 }
 export function incomeStats(rows, accounts, month, end=today()) {
-  const days=dateRange(month,end), actual=rows.filter(r=>r.date.startsWith(month) && r.date<=end);
+  const days=dateRange(month,end), actual=rows.filter(r=>!r.deleted && typeof r.date==='string' && r.date.startsWith(month) && r.date<=end && r.cents!=='' && r.cents!==null && Number.isSafeInteger(Number(r.cents)) && Number(r.cents)>=0);
   const points=days.map(date=> {const entries=actual.filter(r=>r.date===date); return {label:date.slice(8),value:entries.length?sum(entries,'cents')/100:null,date};});
-  const tracks={}; actual.forEach(r=>{const a=accounts.find(a=>a.id===r.accountId); const key=r.track || accountTrack(a||{},r.date); (tracks[key] ||= {name:key,total:0,accounts:new Set()}).total += r.cents; tracks[key].accounts.add(r.accountId);});
+  const tracks=Object.create(null); actual.forEach(r=>{const a=accounts.find(a=>a.id===r.accountId); const key=r.track || accountTrack(a||{},r.date); (tracks[key] ||= {name:key,total:0,accounts:new Set()}).total += Number(r.cents); tracks[key].accounts.add(r.accountId);});
   return {total:sum(actual,'cents'),points,tracks:Object.values(tracks).map(t=>({...t,count:t.accounts.size,average:t.total/t.accounts.size}))};
 }
 export function sleepMinutes(r) {
@@ -47,9 +47,9 @@ export function sleepMinutes(r) {
   if(r.rise && Date.parse(r.rise+'+08:00')<Date.parse(r.wake+'+08:00')) throw new Error('起床时间应在最终醒来之后');
   return Math.round(diff-awake);
 }
-export function completedBooks(books, period) {return books.filter(b=>b.completed && b.completed.startsWith(period)).length;}
+export function completedBooks(books, period) {return books.filter(b=>typeof b.completed==='string' && b.completed.startsWith(period)).length;}
 export function salesStats(clients,deals,period) {
-  const closed=deals.filter(d=>d.date.startsWith(period)); const cohort=clients.filter(c=>c.added?.startsWith(period));
+  const closed=deals.filter(d=>typeof d.date==='string' && d.date.startsWith(period)); const cohort=clients.filter(c=>typeof c.added==='string' && c.added.startsWith(period));
   const converted=new Set(deals.filter(d=>cohort.some(c=>c.id===d.clientId)).map(d=>d.clientId));
   return {customers:new Set(closed.map(d=>d.clientId)).size,revenue:sum(closed,'cents'),cohort:cohort.length,conversion:cohort.length?converted.size/cohort.length:null};
 }

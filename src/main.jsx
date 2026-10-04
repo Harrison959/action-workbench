@@ -1,73 +1,97 @@
 import { Today } from "./features/today/Today";
-import { Review } from "./features/review/Review";
 import { CommandCenter } from "./features/command/CommandCenter";
-import { Projects } from "./features/projects/Projects";
-import { Insights } from "./features/insights/Insights";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import * as db from "./db";
 import { sync, watchSync } from "./cloud";
 import { initNotifications, scheduleEvents } from "./notifications";
 import { today } from "./domain";
 import { Context, Icon, FormDialog, textField } from "./ui";
-import {
-  Tasks,
-  Focus,
-  Goals,
-  Inbox,
-  Schedule,
-  Plan,
-  Cover,
-} from "./pages/CorePages";
-import {
-  Income,
-  Sales,
-  Sleep,
-  Courses,
-  English,
-  Fitness,
-  Guitar,
-  Emotion,
-} from "./pages/Workstreams";
-import { Settings } from "./pages/Settings";
 import { parseRoute } from "./navigation";
 import {
   AppNavigation,
   MobileNavigation,
   AddMenu,
 } from "./components/AppNavigation";
-import { Data, More } from "./pages/NavigationPages";
 import "./styles.css";
 import "./v2.css";
 const pageMap = {
   today: Today,
-  projects: Projects,
-  calendar: Schedule,
-  review: Review,
-  data: Data,
-  tasks: Tasks,
-  focus: Focus,
-  goals: Goals,
-  more: More,
-  inbox: Inbox,
-  plan: Plan,
-  cover: Cover,
-  income: Income,
-  sales: Sales,
-  sleep: Sleep,
-  courses: Courses,
-  english: English,
-  fitness: Fitness,
-  guitar: Guitar,
-  emotion: Emotion,
-  settings: Settings,
-  insights: Insights,
+  projects: lazy(() =>
+    import("./features/projects/Projects").then((m) => ({
+      default: m.Projects,
+    })),
+  ),
+  calendar: lazy(() =>
+    import("./pages/CorePages").then((m) => ({ default: m.Schedule })),
+  ),
+  review: lazy(() =>
+    import("./features/review/Review").then((m) => ({ default: m.Review })),
+  ),
+  data: lazy(() =>
+    import("./features/trackers/Data").then((m) => ({ default: m.Data })),
+  ),
+  tasks: lazy(() =>
+    import("./pages/CorePages").then((m) => ({ default: m.Tasks })),
+  ),
+  focus: lazy(() =>
+    import("./pages/CorePages").then((m) => ({ default: m.Focus })),
+  ),
+  goals: lazy(() =>
+    import("./pages/CorePages").then((m) => ({ default: m.Goals })),
+  ),
+  more: lazy(() =>
+    import("./pages/NavigationPages").then((m) => ({ default: m.More })),
+  ),
+  inbox: lazy(() =>
+    import("./pages/CorePages").then((m) => ({ default: m.Inbox })),
+  ),
+  plan: lazy(() =>
+    import("./pages/CorePages").then((m) => ({ default: m.Plan })),
+  ),
+  cover: lazy(() =>
+    import("./pages/CorePages").then((m) => ({ default: m.Cover })),
+  ),
+  settings: lazy(() =>
+    import("./pages/Settings").then((m) => ({ default: m.Settings })),
+  ),
+  insights: lazy(() =>
+    import("./features/insights/Insights").then((m) => ({
+      default: m.Insights,
+    })),
+  ),
+  income: lazy(() =>
+    import("./pages/Workstreams").then((m) => ({ default: m.Income })),
+  ),
+  sales: lazy(() =>
+    import("./pages/Workstreams").then((m) => ({ default: m.Sales })),
+  ),
+  sleep: lazy(() =>
+    import("./pages/Workstreams").then((m) => ({ default: m.Sleep })),
+  ),
+  courses: lazy(() =>
+    import("./pages/Workstreams").then((m) => ({ default: m.Courses })),
+  ),
+  english: lazy(() =>
+    import("./pages/Workstreams").then((m) => ({ default: m.English })),
+  ),
+  fitness: lazy(() =>
+    import("./pages/Workstreams").then((m) => ({ default: m.Fitness })),
+  ),
+  guitar: lazy(() =>
+    import("./pages/Workstreams").then((m) => ({ default: m.Guitar })),
+  ),
+  emotion: lazy(() =>
+    import("./pages/Workstreams").then((m) => ({ default: m.Emotion })),
+  ),
 };
+
 function App() {
   const [route, setRoute] = useState(() => parseRoute(location.hash)),
     [adding, setAdding] = useState(false),
     [rows, setRows] = useState([]),
     [loaded, setLoaded] = useState(false),
+    [loadError, setLoadError] = useState(false),
     [dialog, setDialog] = useState(null),
     [toast, setToast] = useState(null),
     [syncText, setSyncText] = useState("仅保存在本机"),
@@ -80,8 +104,9 @@ function App() {
       setRows(await db.records());
       setOwner(db.getScope());
       setLoaded(true);
+      setLoadError(false);
     } catch {
-      setToast({ text: "无法读取本机数据库，请检查浏览器存储权限" });
+      setLoadError(true);
     }
   }, []);
   useEffect(() => {
@@ -191,11 +216,32 @@ function App() {
           {!full && (
             <AppNavigation page={route.page} onAdd={() => setAdding(true)} />
           )}
-          <main id="main" className="main">
+          <main id="main" className="main" data-page={route.page}>
             {loaded ? (
-              <Page key={owner + ":" + route.page + ":" + (route.id || "")} />
+              <ErrorBoundary
+                key={owner + ":" + route.page + ":" + (route.id || "")}
+                route
+              >
+                <Suspense
+                  fallback={
+                    <div className="loading" role="status">
+                      正在打开页面…
+                    </div>
+                  }
+                >
+                  <Page />
+                </Suspense>
+              </ErrorBoundary>
+            ) : loadError ? (
+              <div className="fatal" role="alert">
+                <h1>暂时无法读取记录</h1>
+                <p>请检查浏览器存储权限，再重试。</p>
+                <button onClick={refresh}>重试读取</button>
+              </div>
             ) : (
-              <div className="loading">正在打开你的工作台…</div>
+              <div className="loading" role="status">
+                正在打开你的工作台…
+              </div>
             )}
           </main>
           {!full && (
@@ -239,8 +285,13 @@ class ErrorBoundary extends React.Component {
     return this.state.error ? (
       <div className="fatal">
         <h1>页面暂时无法打开</h1>
-        <p>记录仍保留在本机。刷新后再试一次。</p>
+        <p>请检查网络后重新打开页面。此操作不会清除已有记录。</p>
         <button onClick={() => location.reload()}>重新打开</button>
+        {this.props.route && (
+          <a className="text-link" href="#today">
+            返回今天
+          </a>
+        )}
       </div>
     ) : (
       this.props.children

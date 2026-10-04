@@ -152,7 +152,7 @@ export function evaluateRules(c) {
           ? "上周还没有完成周复盘"
           : `${span(reviewWeek)} 尚未保存周复盘`,
         "当前记录中未找到对应自然周的周复盘。",
-        "已结束的自然周没有对应的未删除 weeklyReview 记录。",
+        "已结束的自然周没有对应的未删除的周复盘记录。",
         ["weeklyReview.weekStart/id"],
         reviewWeek,
         [`自然周：${span(reviewWeek)}`, "只检查已保存的复盘，不检查未保存表单"],

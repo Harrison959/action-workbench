@@ -5,7 +5,7 @@ import React, {
   createContext,
   useContext,
 } from "react";
-import * as Icons from "lucide-react";
+import { Icons } from "./icons";
 export const Context = createContext(null);
 export const useApp = () => useContext(Context);
 export function Icon({ name = "ArrowUpRight", size = 19, ...props }) {
@@ -78,12 +78,37 @@ export function Empty({
   );
 }
 export function Tabs({ items, value, onChange }) {
+  const refs = useRef([]);
+  const select = (index) => {
+    onChange(items[index].id || items[index]);
+    refs.current[index]?.focus();
+  };
   return (
-    <div className="tabs" role="tablist">
-      {items.map((i) => (
+    <div className="tabs" role="tablist" aria-label="切换视图">
+      {items.map((i, index) => (
         <button
           key={i.id || i}
           role="tab"
+          ref={(el) => {
+            refs.current[index] = el;
+          }}
+          tabIndex={value === (i.id || i) ? 0 : -1}
+          onKeyDown={(e) => {
+            const next =
+              e.key === "ArrowRight"
+                ? (index + 1) % items.length
+                : e.key === "ArrowLeft"
+                  ? (index - 1 + items.length) % items.length
+                  : e.key === "Home"
+                    ? 0
+                    : e.key === "End"
+                      ? items.length - 1
+                      : null;
+            if (next !== null) {
+              e.preventDefault();
+              select(next);
+            }
+          }}
           aria-selected={value === (i.id || i)}
           className={value === (i.id || i) ? "active" : ""}
           onClick={() => onChange(i.id || i)}
@@ -108,6 +133,10 @@ export function Stats({ items }) {
   );
 }
 export function Chart({ points, label = "趋势", unit = "" }) {
+  points = points.map((p) => ({
+    ...p,
+    value: Number.isFinite(p.value) ? p.value : null,
+  }));
   const values = points.filter(
     (p) => p.value !== null && Number.isFinite(p.value),
   );
@@ -183,7 +212,7 @@ export function Chart({ points, label = "趋势", unit = "" }) {
           )
           .map((p) => (
             <text
-              key={p.label}
+              key={points.indexOf(p)}
               x={x(points.indexOf(p))}
               y="202"
               textAnchor="middle"
@@ -241,6 +270,8 @@ export function RecordList({ rows, render, empty, edit, onRemove }) {
 }
 export function FormDialog({ spec, onClose }) {
   const dialog = useRef(),
+    saving = useRef(false),
+    errorRef = useRef(),
     key = "action-draft:" + spec.key;
   const [values, setValues] = useState(() => {
       try {
@@ -253,33 +284,49 @@ export function FormDialog({ spec, onClose }) {
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   useEffect(() => {
+    const previous = document.activeElement;
     dialog.current.showModal();
     const el = dialog.current;
     if (spec.focusFirst)
       el.querySelector("form input, form textarea, form select")?.focus();
     const cancel = (e) => {
       e.preventDefault();
-      onClose();
+      if (!saving.current) onClose();
     };
     el.addEventListener("cancel", cancel);
-    return () => el.removeEventListener("cancel", cancel);
+    return () => {
+      el.removeEventListener("cancel", cancel);
+      el.close();
+      if (previous?.isConnected) previous.focus({ preventScroll: true });
+    };
   }, []);
   useEffect(() => {
     try {
       sessionStorage.setItem(key, JSON.stringify(values));
     } catch {}
   }, [values, key]);
+  useEffect(() => {
+    if (error) {
+      errorRef.current?.focus();
+      errorRef.current?.scrollIntoView({ block: "nearest" });
+    }
+  }, [error]);
   async function save(e) {
     e.preventDefault();
+    if (saving.current) return;
+    saving.current = true;
     setBusy(true);
     setError("");
     try {
       await spec.save(values);
-      sessionStorage.removeItem(key);
+      try {
+        sessionStorage.removeItem(key);
+      } catch {}
       onClose();
     } catch (e) {
       setError(e.message || "保存失败，请重试");
     } finally {
+      saving.current = false;
       setBusy(false);
     }
   }
@@ -289,19 +336,27 @@ export function FormDialog({ spec, onClose }) {
       className="dialog"
       aria-labelledby="form-dialog-title"
       onClick={(e) => {
-        if (e.target === dialog.current) onClose();
+        if (e.target === dialog.current && !saving.current) onClose();
       }}
     >
       <div className="dialog-top">
         <div>
-          <span className="eyebrow">MAKE IT CONCRETE</span>
           <h2 id="form-dialog-title">{spec.title}</h2>
         </div>
-        <button onClick={onClose} className="icon-button" aria-label="关闭">
+        <button
+          onClick={onClose}
+          disabled={busy}
+          className="icon-button"
+          aria-label="关闭"
+        >
           <Icon name="X" />
         </button>
       </div>
-      <form onSubmit={save}>
+      <form
+        onSubmit={save}
+        aria-busy={busy}
+        aria-describedby={error ? "form-error" : undefined}
+      >
         <div className="form-fields">
           {spec.description && <p className="muted">{spec.description}</p>}
           {spec.fields.map((f) => {
@@ -343,6 +398,7 @@ export function FormDialog({ spec, onClose }) {
                 ) : f.type === "checkbox" ? (
                   <input
                     type="checkbox"
+                    disabled={busy}
                     id={common.id}
                     checked={!!values[f.name]}
                     onChange={(e) =>
@@ -362,7 +418,13 @@ export function FormDialog({ spec, onClose }) {
           })}
         </div>
         {error && (
-          <p className="error" role="alert">
+          <p
+            className="error"
+            role="alert"
+            id="form-error"
+            ref={errorRef}
+            tabIndex={-1}
+          >
             {error}
           </p>
         )}

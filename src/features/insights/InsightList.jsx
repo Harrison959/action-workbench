@@ -18,7 +18,11 @@ const SOURCE_NAMES = {
 
 export function InsightList({ items }) {
   if (!items.length)
-    return <p className="insight-empty">当前没有满足规则和样本要求的提示。</p>;
+    return (
+      <p className="insight-empty">
+        当前没有满足规则和样本要求的提示。可在数据页补充日常记录。
+      </p>
+    );
   return (
     <ul className="insight-list">
       {items.map((item) => (

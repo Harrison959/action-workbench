@@ -43,8 +43,8 @@ test("empty decision entry, Quick Capture to existing Inbox, offline persistence
     "暂无适合现在执行的任务",
   );
   await expect(page.locator(".today-top .task-row")).toHaveCount(0);
-  await expect(page.locator(".today-progress")).toContainText("0 / 0");
-  await expect(page.getByText("今天没有有明确时间的日程。")).toBeVisible();
+  await expect(page.locator(".today-progress")).toContainText("今天尚未安排任务");
+  await expect(page.getByText("今天没有固定安排，可通过「查看日程」添加。")).toBeVisible();
   await page.context().setOffline(true);
   await page.getByLabel("快速记录内容").fill("  明天研究免疫学考试范围  ");
   await page.getByRole("button", { name: "记下", exact: true }).click();

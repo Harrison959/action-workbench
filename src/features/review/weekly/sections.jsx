@@ -36,13 +36,17 @@ export function WeeklySections({ summary: s }) {
               `（含 ${task.crossWeekDone} 项跨周／未排期任务）`}
           </Line>
           <Line label="计划内本周完成">
-            {task.plannedDone} / {task.planned} 项 · 完成率{" "}
+            {task.planned
+              ? `${task.plannedDone} / ${task.planned} 项 · 完成率 `
+              : ""}
             {task.completionRate === null
               ? "暂无计划"
               : Math.round(task.completionRate * 100) + "%"}
           </Line>
           <Line label="Top 3 本周完成">
-            {task.topDone} / {task.top} 项
+            {task.top
+              ? `${task.topDone} / ${task.top} 项`
+              : "本周未安排重点任务"}
           </Line>
           <Line label="Focus 总时长">无法精确统计</Line>
           <Line label="有活动的项目">{s.activeProjectCount} 个</Line>
@@ -159,8 +163,7 @@ export function WeeklySections({ summary: s }) {
           <Line label="销售已录收入">{amount(s.sales.income)}</Line>
         </dl>
         <p className="weekly-note">
-          公众号按 income，客户按首次接触日期，成交按 deal
-          日期；跟进仅统计已完成且关联客户的任务，不是完整沟通次数。
+          公众号按收入归属日期，客户按首次接触日期，成交按成交日期；跟进仅统计已完成且关联客户的任务，不是完整沟通次数。
           {s.sales.missingAmountRecords > 0 &&
             `有 ${s.sales.missingAmountRecords} 条成交记录缺少有效金额。`}
           金额来自已登记样本，不表示已全部填齐。

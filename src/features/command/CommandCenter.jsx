@@ -60,12 +60,24 @@ export function CommandCenter({ children, disabled = false }) {
       (app.route.id || null) !== (target.id || null)
     )
       return;
-    const heading = document.querySelector("#main h1");
-    if (heading) {
+    // A lazy route may mount after this effect. Watch only until its heading exists.
+    const focusHeading = () => {
+      const heading = document.querySelector("#main h1");
+      if (!heading || !heading.getClientRects().length) return false;
       heading.tabIndex = -1;
       heading.focus({ preventScroll: true });
       destination.current = null;
-    }
+      return true;
+    };
+    if (focusHeading()) return;
+    const observer = new MutationObserver(() => {
+      if (focusHeading()) observer.disconnect();
+    });
+    observer.observe(document.getElementById("main"), {
+      childList: true,
+      subtree: true,
+    });
+    return () => observer.disconnect();
   }, [app.route, opened]);
   const restore = () => {
     if (returnTo.current?.isConnected)

@@ -9,7 +9,8 @@ import {
   pageTitle,
 } from "../navigation";
 import { today } from "../domain";
-import { taskEditor, eventEditor } from "../pages/CorePages";
+import { taskEditor } from "../features/tasks/TaskComponents";
+import { eventEditor } from "../features/calendar/editor";
 
 export function AppNavigation({ page, onAdd }) {
   const a = useApp();

@@ -180,7 +180,7 @@ export function weeklySummary(rows, selectedDate, asOf = today()) {
   const inactiveProjects = projects.filter((p) => p.noActivityThisWeek);
   const facts = [
     `计划任务 ${taskStats.planned} 项，计划内本周完成 ${taskStats.plannedDone} 项`,
-    `Top 3 本周完成 ${taskStats.topDone} / ${taskStats.top} 项`,
+    taskStats.top ? `Top 3 本周完成 ${taskStats.topDone} / ${taskStats.top} 项` : "本周尚未安排重点任务",
     `睡眠已记录 ${sleep.recordedDays}/7 天`,
     `当前进行中的项目有 ${inactiveProjects.length} 个在所选周未见推进记录`,
     durations["workout.minutes"].value === null

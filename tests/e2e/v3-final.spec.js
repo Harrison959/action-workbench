@@ -13,6 +13,7 @@ async function seed(page) {
     const { put } = await import("/src/db.js");
     const { today } = await import("/src/domain.js");
     const date = today();
+    await put("projectNote", { projectId: "v3-project", text: "完成章节梳理", createdAt: new Date().toISOString() }, "v3-note");
     await put(
       "project",
       {
@@ -81,5 +82,29 @@ test("V3 Tasks exposes priority, project, date and the existing Focus controls",
       ),
     ).toBe(true);
   }
+});
+
+test("V3 project detail preserves outcome, progress, next action and bottom lifecycle", async ({
+  page,
+}) => {
+  const date = await seed(page);
+  await page.goto("/#projects/v3-project");
+  await expect(page.locator("main h1")).toHaveText("期末复习项目");
+  await expect(page.locator(".project-outcome-section")).toContainText(
+    "复习四门课程",
+  );
+  await expect(page.locator(".project-progress-section")).toContainText(date);
+  await expect(
+    page
+      .locator(".project-next-section")
+      .getByRole("button", { name: "开始专注", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator(".project-lifecycle")
+      .getByRole("button", { name: "编辑项目" }),
+  ).toBeVisible();
+  await page.locator(".project-history-disclosure > summary").click();
+  await expect(page.locator(".project-history")).toBeVisible();
 });
 

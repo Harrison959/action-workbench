@@ -360,45 +360,36 @@ function ProjectDetail({ id }) {
     </div>
   );
   return (
-    <>
+    <div className="project-detail">
       <Link to="projects" className="project-back">
         <Icon name="ArrowLeft" size={16} /> 项目
       </Link>
-      <PageHead
-        title={project.title}
-        action={
-          <Button
-            secondary
-            icon="Pencil"
-            onClick={() => projectEditor(a, project)}
-          >
-            编辑项目
-          </Button>
-        }
-      />
+      <PageHead title={project.title} />
       <div className="project-info">
         <span className={"project-status " + project.status}>
           {PROJECT_STATUSES[project.status]}
         </span>
         <span>{areaLabel(project.area)}</span>
         {project.startDate && <span>{project.startDate} 开始</span>}
-        {project.dueDate && (
-          <span
-            className={active && project.dueDate < today() ? "overdue" : ""}
-          >
-            {project.dueDate} 截止
-          </span>
-        )}
       </div>
-      <Section title="完成结果">
+      <Section title="完成结果" className="project-outcome-section">
         <p className="project-text">{project.outcome || "尚未填写完成结果"}</p>
         {project.description && (
           <p className="muted project-text">{project.description}</p>
         )}
-        <Progress project={project} tasks={tasks} />
       </Section>
+      <div className="project-progress-section" aria-label="项目进度与截止">
+        <Progress project={project} tasks={tasks} />
+        {project.dueDate && (
+          <p className="project-deadline">
+            <Icon name="CalendarDays" size={16} />
+            {project.dueDate} 截止
+          </p>
+        )}
+      </div>
       <Section
         title="下一步行动"
+        className="project-next-section"
         action={
           <button className="text-link" onClick={chooseNext}>
             设置下一步
@@ -523,18 +514,28 @@ function ProjectDetail({ id }) {
           <p className="muted">记录资料、结论或下次需要注意的事。</p>
         )}
       </Section>
-      <Section title="最近推进记录">
-        <ol className="project-history">
-          {history.map((event) => (
-            <li key={event.id}>
-              <time>{formatDate(event.date)}</time>
-              <span>{event.text}</span>
-            </li>
-          ))}
-        </ol>
-        {!history.length && <p className="muted">暂无可显示的推进记录。</p>}
-      </Section>
+      <details className="project-history-disclosure">
+        <summary>最近推进记录 · {history.length}</summary>
+        <Section title="最近推进记录">
+          <ol className="project-history">
+            {history.map((event) => (
+              <li key={event.id}>
+                <time>{formatDate(event.date)}</time>
+                <span>{event.text}</span>
+              </li>
+            ))}
+          </ol>
+          {!history.length && <p className="muted">暂无可显示的推进记录。</p>}
+        </Section>
+      </details>
       <div className="project-lifecycle">
+        <Button
+          secondary
+          icon="Pencil"
+          onClick={() => projectEditor(a, project)}
+        >
+          编辑项目
+        </Button>
         {active ? (
           <>
             <Button
@@ -566,7 +567,7 @@ function ProjectDetail({ id }) {
           移入回收站
         </button>
       </div>
-    </>
+    </div>
   );
 }
 function formatDate(date) {

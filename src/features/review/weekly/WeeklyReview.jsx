@@ -5,6 +5,8 @@ import { validDate } from "../../trackers/metrics.js";
 import { weekRange, weeklySummary } from "./selectors.js";
 import { reviewId, weeklyReviewPayload } from "./model.js";
 import { WeeklySections } from "./sections.jsx";
+import { insightReport } from "../../insights/selectors.js";
+import { InsightList } from "../../insights/InsightList.jsx";
 import "./weekly.css";
 
 function Reflection({ week, record, projects, app }) {
@@ -150,6 +152,16 @@ export function WeeklyReview() {
     [app.rows, selected, currentDate],
   );
   const { start, end } = summary.range;
+  const insights = useMemo(
+    () =>
+      insightReport(app.rows, {
+        asOf: currentDate,
+        weekDate: selected,
+        limit: 3,
+        summary,
+      }),
+    [app.rows, app.owner, selected, currentDate, summary],
+  );
   const record =
     app.list("weeklyReview").find((r) => r.id === reviewId(start)) ||
     app.list("weeklyReview").find((r) => r.weekStart === start);
@@ -196,6 +208,14 @@ export function WeeklyReview() {
           "本周尚未结束，统计会随记录更新。"}
       </p>
       <WeeklySections summary={summary} />
+      <section className="weekly-insights" aria-label="值得注意">
+        <h2>值得注意</h2>
+        <p className="insight-reference">
+          以 {insights.reference}{" "}
+          为参考日回看记录，趋势对比包含此前周期；最多展示三条。
+        </p>
+        <InsightList items={insights.items} />
+      </section>
       <Reflection
         key={app.owner + ":" + start}
         week={start}

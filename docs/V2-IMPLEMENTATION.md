@@ -292,3 +292,57 @@ src/features/records/editors.js 小范围提取原 openRecord 与六类表单；
 首次同时运行 E2E 与 production 时，两个既有 Command Center 用例在初始 page.goto 等待 load 阶段超时；随后单独重跑完整 npm run test:e2e，38 项全部通过、8 项设备范围跳过。未修改命令中心或放宽断言；该次加载超时仍作为测试环境稳定性边界记录。
 
 尚未验证真实 Supabase 双端往返、Android 真机录入/通知/覆盖安装。本阶段不改变 schema 或同步协议，不需要执行新的数据库脚本。英语来源选择、书籍管理、按账号收入录入、吉他录音附件和训练计划继续通过原页面完成。停止于 Phase 5C，未进入 Phase 7。
+
+## Phase 7：Rule-based Insight（2026-10-04）
+
+基于 main 的 6774e80 实施。只提供运行时「事实 → 规则 → 简短提示」，没有 insight kind、持久化结果、SQL migration、IndexedDB 升级、LLM 调用、自然语言问答、诊断、医疗建议、因果推断、自动建议或任务／项目修改。Data 统一录入、Today 决策入口、原业务模型与同步协议保持原实现。
+
+### 数据层与日期
+
+src/features/insights/selectors.js 建立 scope 内的只读计算上下文：复用 createTrackerReader(rows)、weeklySummary、weekRange、timestampDate。周复盘传入已有 summary，避免重复算其任务统计。周复盘的项目活动日期被小范围提取为 projectActivityDates，并复用 projectTasks；Weekly Review 与 Insight 共用相同的任务完成、新增笔记和保留的完成状态来源，不使用 updatedAt 推测活动。
+
+所有窗口使用北京时间业务日期、两端包含。当前入口参考日为今天；历史周复盘参考日为所选周日；本周参考日为今天。最近 7 天为 reference-6 至 reference，前 7 天为 reference-13 至 reference-7；另有最近 14、30 天。任务和重点仍按统一自然周计算，不另造滚动计划统计。未来周不产生提示。历史周使用目前仍保留的任务／记录重算，不声称还原过去的任务计划快照。
+
+时长、金额、平均和记录天数均从 Tracker Reader 的有效日汇总读取，不再实现 Adapter；14/30 天总量仅累加 Reader 返回的有效日值，全部缺失时仍为 null。账号集中度复用已有 adaptRecords 的合法 income.cents，再按真实 accountId 分组，分母为 Reader 已录总金额。不推测未知金额或补零，忽略删除、非法日期和非法数值；趋势总量溢出或金额超过安全整数范围时不生成伪精确提示。
+
+### 第一批十条规则
+
+| 规则 | 真实来源 | 阈值／最低样本 |
+| --- | --- | --- |
+| 项目 14 天未见推进 | project.status/createdAt/startDate；task.projectId/status/completedAt；projectNote.projectId/createdAt；有效 project.completedAt | 当前 active，已知创建／开始覆盖完整 14 个业务日期，区间没有可确认活动；新项目、年龄未知、未来开始、存在未标日期的完成任务／笔记时不提示 |
+| 周复盘未保存 | weeklyReview.weekStart 或既有规范 ID | 当前入口检查上一个已结束自然周；历史周入口检查所选已结束自然周；删除记录不当作已完成 |
+| 计划完成率 | weeklySummary.tasks | 计划至少 5 项且计划内完成率 <40%；取消排除、跨周完成不作计划内完成；本周未结束时明确包含尚未到期计划 |
+| Top 3 完成情况 | weeklySummary.tasks.top/topDone | 至少 3 项且完成率 <40%；与计划完成率同组，只展示其中一条 |
+| 睡眠日均变化 | sleep.minutes → sleep.duration | 两期各至少 3 个有效记录日，日均差绝对值 ≥45 分钟；展示两边平均值、记录天数与日期 |
+| 睡眠记录覆盖 | sleep.duration 的 recordedDays | 最近 7 天有效记录日数 ≤2；只说明趋势依据不足 |
+| 运动低记录 | workout.minutes → workout.minutes | 最近 14 天无有效时长，或有效记录合计明确为 0；分别用「没有记录到有效时长」与「已录合计 0 分钟」，不判断实际行为 |
+| 学习记录变化 | study.minutes；episode.minutes + reading.minutes | 两期各至少记录 3 天，前期 >0，总量变化绝对比例 ≥50% 且相差 ≥30 分钟；专业课／英语仅保留比例变化最大的一项，不读取 word 分钟 |
+| 已录公众号收入变化 | income.cents → income.amount | 两期各至少记录 3 天，前期 >0，金额变化绝对比例 ≥50% 且相差 ≥¥100；展示两期覆盖，不解释为全部账号的完整收入 |
+| 账号收入集中度 | income.accountId/cents/date + account.id/name | 最近 30 天至少记录 7 天、合计 ≥¥100，单一账号份额 ≥80%；所有正收入须能关联命名账号，否则跳过；按账号 ID 分组，不按当前赛道倒推历史来源 |
+
+项目的 active 状态没有历史快照，因此历史周不生成“当时进行中项目停滞”的提示。14 天无推进仅陈述没有可确认记录，不声称项目一直处于 active 或没有实际工作。保留的 project.completedAt 仅在 completed/archived 状态被视为完成记录，与原周复盘口径一致；状态重开清掉的历史不伪造。
+
+学习、收入零基准不计算百分比变化；已录 0 仍是有效数据，不等于缺失。比较不要求两期完全填齐，因此文案始终为“记录／已录总量”，同时明确各期天数。收入不含 deal、销售不进入通用 Tracker；本阶段没有新增 CRM 洞察、身体／情绪判断或 Focus 趋势（现模型无历史 session）。
+
+### 结果与展示规则
+
+每个结果包含稳定 id、type、severity（info/attention）、title、description、evidence、actionLabel/actionRoute。evidence 保存运行时来源字段、明确规则、日期范围、有效样本与相关数值；不复制进数据库。UI 展开「规则与依据」显示中文来源和依据，隐藏实现字段名称。
+
+排序：项目 → 周复盘 → 计划／重点 → 睡眠 → 学习／运动 → 收入。同 ID 去重；项目最多 2 条，其余同组最多 1 条。计划／Top 3 同组，专业课／英语同组按变化比例降序，收入变化／集中度同组且变化优先。相同优先级与幅度按稳定 ID 排序，输入顺序不影响结果。
+
+「更多 → 值得注意」提供 #insights 列表，默认最多 5 条；没有新增一级导航。「每周复盘 → 值得注意」最多 3 条，明确参考日期及此前对比周期。每条有原项目／业务页／对应周复盘行动链接；历史周缺复盘链接进入所选周，不误跳到当前周。Daily 和 Today 不显示 Insight，旧路由、手机 Add Menu、Command Center 保留。
+
+保存原始业务记录、新增项目笔记或保存周复盘后，沿现有 db.subscribe → app.rows 更新自动重算；全页使用每 30 秒与 visibilitychange 更新当天，周复盘复用原日期刷新。没有持久化 Insight、跨账号缓存或第二套历史真相。
+
+### 修改范围与验证
+
+- 新增 src/features/insights/{rules.js,selectors.js,InsightList.jsx,Insights.jsx,insights.css}。
+- 小范围修改 WeeklyReview.jsx / weekly/selectors.js、main.jsx、navigation.js、NavigationPages.jsx。
+- 新增 tests/insights.test.js 与 tests/e2e/insights.spec.js；补充 tests/production/pages.spec.js。
+- npm test：69 项通过（新增 14 组规则测试），覆盖业务日期边界、真实活动／未知时间、任务交集和阈值、Top 3 去重、睡眠均值与样本、缺失／显式零、学习和金额比较、来源集中度、排序／数量上限、原路由及无 Focus 伪统计；既有存储、备份、同步 CAS、SQL/RLS 测试通过。
+- npm run test:e2e：42 项通过，8 项按设备范围跳过。新增桌面／手机测试验证 More 入口、五条上限、周复盘三条上限、历史参考周、来源依据、项目与周复盘 action、保存后提示更新、刷新、查看前后备份行完全相等、Today 无提示、无模型请求、无 pageerror 和无横向溢出；已有功能回归通过。
+- npm run build：通过，保留原有主包超过 500kB 警告。
+- npm run test:production：7 项通过，新增 Pages 子路径 Insight 路由、刷新和对应周复盘 action；检查资源请求及 pageerror。
+- 已查看 .qa/insights-mobile.png，保持文本列表，无警报配色或卡片墙。QA 图片不提交。
+
+未验证真实 Supabase 双端、Android 真机与覆盖安装；本阶段不变更云端／本机存储结构。现有历史限制仍包括 Focus session、项目状态完整历史、任务计划快照、完整销售沟通。规则均不补造这些数据，不预测未来，不做因果、心理或医疗判断。止于规则型 Insight，不进入 AI Insight 或后续 UI 大重构。

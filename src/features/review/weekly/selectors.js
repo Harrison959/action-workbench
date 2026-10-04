@@ -1,7 +1,7 @@
 import { addDays, day, today } from "../../../domain.js";
 import { createTrackerReader } from "../../trackers/selectors.js";
 import { numeric, validDate } from "../../trackers/metrics.js";
-import { projectProgress } from "../../projects/model.js";
+import { projectProgress, projectTasks } from "../../projects/model.js";
 
 export function weekRange(date = today()) {
   if (!validDate(date)) throw new Error("无效周日期");
@@ -22,6 +22,21 @@ export function timestampDate(value) {
     : value + "+08:00";
   const stamp = Date.parse(withZone);
   return Number.isFinite(stamp) ? day(new Date(stamp)) : null;
+}
+// The same real activity sources serve Weekly Review and rule-based Insight.
+export function projectActivityDates(project, rows) {
+  const live = rows.filter((r) => !r.deleted);
+  return [
+    ...projectTasks(project.id, live.filter((r) => r.kind === "task"))
+      .filter((t) => t.status === "done")
+      .map((t) => timestampDate(t.completedAt)),
+    ...live
+      .filter((n) => n.kind === "projectNote" && n.projectId === project.id)
+      .map((n) => timestampDate(n.createdAt)),
+    ...(["completed", "archived"].includes(project.status)
+      ? [timestampDate(project.completedAt)]
+      : []),
+  ].filter(Boolean);
 }
 export function weeklySummary(rows, selectedDate, asOf = today()) {
   const range = weekRange(selectedDate),
@@ -123,17 +138,7 @@ export function weeklySummary(rows, selectedDate, asOf = today()) {
       const completionDate = timestampDate(p.completedAt);
       const completedStatus =
         ["completed", "archived"].includes(p.status) && inRange(completionDate);
-      const activityDates = [
-        ...tasks
-          .filter((t) => t.projectId === p.id && t.status === "done")
-          .map((t) => timestampDate(t.completedAt)),
-        ...live
-          .filter((n) => n.kind === "projectNote" && n.projectId === p.id)
-          .map((n) => timestampDate(n.createdAt)),
-        ...(["completed", "archived"].includes(p.status)
-          ? [completionDate]
-          : []),
-      ].filter(Boolean);
+      const activityDates = projectActivityDates(p, live);
       const since =
         timestampDate(p.createdAt) ||
         (validDate(p.startDate) ? p.startDate : null);

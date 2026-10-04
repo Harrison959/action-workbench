@@ -1,5 +1,24 @@
 import { test, expect } from "@playwright/test";
 
+test("Insight stays under More and reaches the previous weekly review in the Pages subpath", async ({ page }) => {
+  const errors = [], missing = [];
+  page.on("pageerror", e => errors.push(e.message));
+  page.on("response", r => { if (r.status() >= 400 && r.url().startsWith("http://127.0.0.1:4176")) missing.push(r.url()); });
+  await page.addInitScript(() => localStorage.setItem("action-cloud", JSON.stringify({ url: "", key: "" })));
+  await page.goto("./#more");
+  await page.getByRole("link", { name: "值得注意", exact: false }).click();
+  await expect(page).toHaveURL(/\/action-workbench\/#insights$/);
+  await expect(page.getByRole("heading", { name: "值得注意", exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.locator(".insight-list > li")).toHaveCount(3);
+  await page.locator('[data-insight="review-missing"]').getByRole("link").click();
+  await expect(page).toHaveURL(/#review\?view=weekly&week=/);
+  await expect(page.getByRole("heading", { name: "每周复盘", exact: true })).toBeVisible();
+  await expect(page.locator(".weekly-insights")).toBeVisible();
+  expect(errors).toEqual([]);
+  expect(missing).toEqual([]);
+});
+
 test("Data recording reuses the guitar editor on the built Pages subpath", async ({ page }) => {
   const errors = [], missing = [];
   page.on("pageerror", e => errors.push(e.message));

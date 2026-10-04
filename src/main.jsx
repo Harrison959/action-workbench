@@ -2,6 +2,7 @@ import { Today } from "./features/today/Today";
 import { Review } from "./features/review/Review";
 import { CommandCenter } from "./features/command/CommandCenter";
 import { Projects } from "./features/projects/Projects";
+import { Insights } from "./features/insights/Insights";
 import React, { useState, useEffect, useCallback } from "react";
 import { createRoot } from "react-dom/client";
 import * as db from "./db";
@@ -60,6 +61,7 @@ const pageMap = {
   guitar: Guitar,
   emotion: Emotion,
   settings: Settings,
+  insights: Insights,
 };
 function App() {
   const [route, setRoute] = useState(() => parseRoute(location.hash)),

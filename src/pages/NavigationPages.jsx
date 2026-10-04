@@ -37,6 +37,7 @@ export function More() {
             ["plan", "提前安排", "选择每天的重点", "ListChecks"],
             ["goals", "目标", "月度、季度与长期目标", "Target"],
             ["sales", "销售", "客户、跟进与成交记录", "Users"],
+            ["insights", "值得注意", "查看少量事实变化及规则依据", "ListFilter"],
             ["projects?status=archived", "已归档项目", "", "Archive"],
           ]}
         />

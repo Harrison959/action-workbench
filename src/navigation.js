@@ -25,6 +25,7 @@ const otherPages = [
   "cover",
   "sales",
   "settings",
+  "insights",
 ];
 
 // Keep hashes so Pages subpaths, existing bookmarks and Android notifications work.
@@ -69,6 +70,7 @@ export function pageTitle(page) {
       cover: "封面",
       sales: "销售",
       settings: "设置与同步",
+      insights: "值得注意",
       income: "公众号收入",
       sleep: "睡眠",
       courses: "专业课",

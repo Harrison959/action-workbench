@@ -664,32 +664,6 @@ export function Summary() {
         ]}
       />
       <div className="two-col">
-        <Section title="今天留下的足迹" className="daily-footprints">
-          {tasks.length ? (
-            tasks.map((t) => <TaskRow key={t.id} task={t} compact />)
-          ) : (
-            <p className="quiet-note">今天还没有任务记录。</p>
-          )}
-          {STREAMS.slice(2).map((s) => {
-            const kinds = {
-              sleep: ["sleep"],
-              courses: ["study"],
-              english: ["episode", "word", "reading"],
-              fitness: ["workout", "body"],
-              guitar: ["guitar"],
-              emotion: ["emotion"],
-            };
-            const count = a.rows.filter(
-              (r) => (kinds[s.id] || []).includes(r.kind) && r.date === date,
-            ).length;
-            return count ? (
-              <p className="summary-count" key={s.id}>
-                {s.name}
-                <b>{count} 条记录</b>
-              </p>
-            ) : null;
-          })}
-        </Section>
         <Section title="留给明天的自己" className="daily-reflection">
           <form
             onSubmit={async (e) => {
@@ -718,7 +692,11 @@ export function Summary() {
                   }
                   value={values[key] || ""}
                   rows="3"
-                  placeholder={key === "change" ? "写下明天最重要的事，以及想做的一点调整" : undefined}
+                  placeholder={
+                    key === "change"
+                      ? "写下明天最重要的事，以及想做的一点调整"
+                      : undefined
+                  }
                   onChange={(e) =>
                     setValues({ ...values, [key]: e.target.value })
                   }
@@ -734,6 +712,32 @@ export function Summary() {
               </Link>
             </div>
           </form>
+        </Section>
+        <Section title="今天留下的足迹" className="daily-footprints">
+          {tasks.length ? (
+            tasks.map((t) => <TaskRow key={t.id} task={t} compact />)
+          ) : (
+            <p className="quiet-note">今天还没有任务记录。</p>
+          )}
+          {STREAMS.slice(2).map((s) => {
+            const kinds = {
+              sleep: ["sleep"],
+              courses: ["study"],
+              english: ["episode", "word", "reading"],
+              fitness: ["workout", "body"],
+              guitar: ["guitar"],
+              emotion: ["emotion"],
+            };
+            const count = a.rows.filter(
+              (r) => (kinds[s.id] || []).includes(r.kind) && r.date === date,
+            ).length;
+            return count ? (
+              <p className="summary-count" key={s.id}>
+                {s.name}
+                <b>{count} 条记录</b>
+              </p>
+            ) : null;
+          })}
         </Section>
       </div>
     </>

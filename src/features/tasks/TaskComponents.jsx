@@ -31,7 +31,11 @@ export function taskEditor(app, row = {}, options = {}) {
       label: "原关联项目（待同步或在回收站）",
     });
   app.edit({
-    key: "task:" + (row.id || options.id || (row.projectId ? "new:" + row.projectId : "new")),
+    key:
+      "task:" +
+      (row.id ||
+        options.id ||
+        (row.projectId ? "new:" + row.projectId : "new")),
     title: options.title || (row.id ? "任务详情" : "把下一步写清楚"),
     initial: {
       date: today(),
@@ -185,6 +189,9 @@ export function TaskRow({
           )}
           <strong>{task.title}</strong>
           <span>
+            {variant === "today" && (
+              <i className="priority">{task.priority || "P2"} · </i>
+            )}
             {variant !== "today" && (
               <>
                 <i className={"priority " + (task.priority || "P2")}>

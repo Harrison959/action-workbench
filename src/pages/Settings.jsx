@@ -175,33 +175,7 @@ export function Settings() {
                 <p>{user.email}</p>
                 <div className="button-row">
                   <Button onClick={() => tryDo(sync)}>立即同步</Button>
-                  <Button
-                    secondary
-                    onClick={() =>
-                      tryDo(async () => {
-                        await logout();
-                        setUser(null);
-                        a.notify("已退出云端，缓存仍保留");
-                      })
-                    }
-                  >
-                    退出登录
-                  </Button>
                 </div>
-                <button
-                  className="text-link"
-                  onClick={() =>
-                    tryDo(async () => {
-                      const count = await db.importLocal();
-                      await sync();
-                      a.notify(
-                        `已合并 ${count} 条本机记录，同 ID 的记录保留云端空间原值`,
-                      );
-                    })
-                  }
-                >
-                  把本机记录合并到此账号
-                </button>
               </>
             ) : (
               <Button
@@ -421,6 +395,42 @@ export function Settings() {
           {native ? "Android 应用" : "网页版"} · 北京时间
         </p>
       </Section>
+      {user && (
+        <Section title="账号操作">
+          <p className="muted">
+            退出不会删除本机缓存。合并本机记录前，建议先导出备份。
+          </p>
+          <div className="button-row">
+            {" "}
+            <Button
+              secondary
+              onClick={() =>
+                tryDo(async () => {
+                  await logout();
+                  setUser(null);
+                  a.notify("已退出云端，缓存仍保留");
+                })
+              }
+            >
+              退出登录
+            </Button>{" "}
+            <button
+              className="text-link"
+              onClick={() =>
+                tryDo(async () => {
+                  const count = await db.importLocal();
+                  await sync();
+                  a.notify(
+                    `已合并 ${count} 条本机记录，同 ID 的记录保留云端空间原值`,
+                  );
+                })
+              }
+            >
+              把本机记录合并到此账号
+            </button>
+          </div>
+        </Section>
+      )}
       <details className="settings-advanced">
         <summary>高级工具（既有功能）</summary>
         <Section title="基于记录的 AI 复盘">

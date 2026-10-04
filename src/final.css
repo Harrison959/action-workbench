@@ -1,4 +1,122 @@
 /* UI V3 Final: additive refinements over the verified Phase 9C foundation. */
+.app.v2 :is(button, a, input, textarea, select, summary):focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 3px;
+}
+.app.v2 .file-button:focus-within {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 3px;
+}
+.app.v2
+  :is(
+    .icon-button,
+    .button,
+    .tabs button,
+    .text-link,
+    .file-button,
+    .task-project,
+    .project-back,
+    .focus-back
+  ) {
+  min-height: 44px;
+}
+.app.v2 .icon-button {
+  min-width: 44px;
+}
+.app.v2 .task-row .check {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+}
+.app.v2 .task-row .task-text {
+  min-height: 44px;
+}
+.app.v2 .task-project {
+  display: inline-flex;
+  align-items: center;
+}
+.app.v2 :is(input[type="range"], .field:has(input[type="checkbox"])) {
+  min-height: 44px;
+}
+.app.v2 .today-next.action-surface {
+  background: var(--accent-strong);
+  color: var(--on-accent);
+}
+.app.v2
+  .today-next.action-surface
+  :is(
+    h2,
+    .today-action-title,
+    .today-action-meta,
+    .today-action-meta a,
+    .today-reason,
+    .action-estimate,
+    .today-empty
+  ) {
+  color: inherit;
+}
+.app.v2 .today-next.action-surface .action-start {
+  background: var(--surface);
+  color: var(--accent-strong);
+  border-color: var(--surface);
+}
+.app.v2 .today-top .priority {
+  display: inline;
+  font-size: 12px;
+  color: inherit;
+  font-style: normal;
+}
+.app.v2 .empty {
+  padding: 24px 16px;
+}
+.app.v2 .workstream-page .empty {
+  padding: 20px 12px;
+}
+.app.v2
+  :is(
+    .record,
+    .weekly-project,
+    .weekly-priorities,
+    .project-detail,
+    .inbox-page
+  )
+  :is(h1, h2, h3, p, small, span) {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .app.v2 .calendar-month {
+    padding-inline: 6px;
+  }
+  .app.v2 .calendar-days {
+    gap: 0;
+  }
+  .app.v2 .calendar-days button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .app.v2 .today-top .task-project {
+    min-height: 32px;
+  }
+  .app.v2 .filter-row > :is(input, select, label) {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .app.v2 .dialog :is(input, select, textarea) {
+    font-size: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app.v2 *,
+  .app.v2 *::before,
+  .app.v2 *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+html[data-theme="dark"] .app.v2 .illustrated-header > .header-art {
+  opacity: 0.24;
+}
 .app.v2 :is(main, .sidebar, .topbar) {
   font-family: "DM Sans", "Microsoft YaHei", sans-serif;
 }

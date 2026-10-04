@@ -13,7 +13,15 @@ export const Context = createContext(null);
 export const useApp = () => useContext(Context);
 export function Icon({ name = "ArrowUpRight", size = 19, ...props }) {
   const C = Icons[name] || Icons.Circle;
-  return <C size={size} strokeWidth={1.6} {...props} />;
+  return (
+    <C
+      size={size}
+      strokeWidth={1.6}
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    />
+  );
 }
 export function Button({
   children,

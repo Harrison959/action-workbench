@@ -192,3 +192,87 @@ test("V3 desktop layouts use lateral space at 1024 through 1920", async ({
     }
   }
 });
+
+test("V3 settings hierarchy, touch controls and long content survive responsive dark mode", async ({
+  page,
+}) => {
+  test.setTimeout(90000);
+  await seed(page);
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.evaluate(async () => {
+    const db = await import("/src/db.js");
+    const rows = await db.records();
+    const task = rows.find((r) => r.id === "v3-task"),
+      project = rows.find((r) => r.id === "v3-project");
+    await db.put(
+      "task",
+      { ...task, title: "很长的任务内容".repeat(28) },
+      task.id,
+    );
+    await db.put(
+      "project",
+      { ...project, title: "很长的项目名称".repeat(25) },
+      project.id,
+    );
+    await db.put(
+      "projectNote",
+      {
+        projectId: project.id,
+        text: "复习笔记内容".repeat(200),
+        createdAt: new Date().toISOString(),
+      },
+      "long-note",
+    );
+  });
+  for (const width of [360, 390, 412, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 800 });
+    for (const route of [
+      "today",
+      "projects/v3-project",
+      "data",
+      "insights",
+      "settings",
+    ]) {
+      await page.goto("/#" + route);
+      await expect(page.locator("main h1")).toBeVisible();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+    }
+  }
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/#calendar");
+  const sizes = await page
+    .locator(".calendar-days button")
+    .evaluateAll((es) =>
+      es.map((e) => ({
+        width: e.getBoundingClientRect().width,
+        height: e.getBoundingClientRect().height,
+      })),
+    );
+  for (const size of sizes) {
+    expect(size.width).toBeGreaterThanOrEqual(44);
+    expect(size.height).toBeGreaterThanOrEqual(44);
+  }
+  await page.goto("/#settings");
+  await expect(
+    page.locator(".settings-page > .section > .section-head h2"),
+  ).toHaveText(["外观", "云同步", "晚间提醒", "关于"]);
+  await page.getByRole("button", { name: "深色 · 暖紫", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.locator(".connection-details > summary").click();
+  await expect(
+    page.getByRole("textbox", { name: "Supabase 项目地址" }),
+  ).toBeVisible();
+  await page.goto("/#today");
+  await expect(page.locator(".today-top")).toContainText("P1");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  expect(errors).toEqual([]);
+});

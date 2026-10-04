@@ -43,8 +43,10 @@ test("empty decision entry, Quick Capture to existing Inbox, offline persistence
     "暂无适合现在执行的任务",
   );
   await expect(page.locator(".today-top .task-row")).toHaveCount(0);
-  await expect(page.locator(".today-progress")).toContainText("今天尚未安排任务");
-  await expect(page.getByText("今天没有固定安排，可通过「查看日程」添加。")).toBeVisible();
+  await expect(page.locator(".today-progress")).toContainText(
+    "今天尚未安排任务",
+  );
+  await expect(page.getByText("今天没有固定安排")).toBeVisible();
   await page.context().setOffline(true);
   await page.getByLabel("快速记录内容").fill("  明天研究免疫学考试范围  ");
   await page.getByRole("button", { name: "记下", exact: true }).click();
@@ -98,7 +100,11 @@ test("Top 3, detail edit, completion updates recommendation, progress and persis
     .click();
   await expect(page.locator(".today-action-title")).toHaveText("第二件");
   await expect(page.locator(".today-progress")).toContainText("1 / 5");
-  await expect(top.locator(".today-task-number")).toHaveText(["1", "2", "3"]);
+  await expect(top.locator(".today-task-number")).toHaveText([
+    "01",
+    "02",
+    "03",
+  ]);
   await top.getByRole("button", { name: /第二件.*25 分钟/ }).click();
   await page.getByLabel("具体做什么").fill("修改后的第二件");
   await page

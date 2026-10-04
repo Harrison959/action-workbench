@@ -143,8 +143,8 @@ function ProjectList() {
         <small>{projects.length} 个项目</small>
       </div>
       {projects.length ? (
-        <div className="project-list">
-          {projects.map((project) => {
+        <div className="project-list project-slabs">
+          {projects.map((project, index) => {
             const next = nextProjectAction(project, tasks),
               overdue =
                 project.status === "active" &&
@@ -152,10 +152,13 @@ function ProjectList() {
                 project.dueDate < today();
             return (
               <Link
-                className="project-list-row"
+                className={"project-list-row project-slab " + project.status}
                 key={project.id}
                 to={projectPath(project.id)}
               >
+                <span className="project-index" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
                 <div className="project-list-main">
                   <div className="project-row-title">
                     <h2>{project.title}</h2>

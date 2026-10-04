@@ -5,6 +5,32 @@
   gap: 16px;
   justify-content: space-between;
 }
+.tracker-open {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.tracker-groups {
+  display: grid;
+  gap: 24px;
+}
+.tracker-group > h2 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.tracker-record {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.tracker-mood {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+}
 .tracker-toolbar {
   flex-wrap: wrap;
   margin-bottom: 12px;

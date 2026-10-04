@@ -77,7 +77,7 @@ export function AppNavigation({ page, onAdd }) {
 export function MobileNavigation({ page, onAdd }) {
   const selected = mobileGroup(page);
   return (
-    <nav className="bottom-nav" aria-label="手机导航">
+    <nav className="bottom-nav mobile-dock" aria-label="手机导航">
       {[
         ["today", "今天", "House"],
         ["projects", "项目", "FolderKanban"],
@@ -86,7 +86,12 @@ export function MobileNavigation({ page, onAdd }) {
         ["more", "更多", "Grid2X2"],
       ].map(([id, label, icon]) =>
         id === "add" ? (
-          <button key={id} onClick={onAdd} aria-label="添加">
+          <button
+            key={id}
+            className="dock-add"
+            onClick={onAdd}
+            aria-label="添加"
+          >
             <span className="add-primary-icon">
               <Icon name={icon} size={24} />
             </span>
@@ -147,16 +152,16 @@ export function AddMenu({ onClose }) {
         </button>
       </div>
       <div className="add-options">
+        <button className="menu-row" onClick={() => act(() => taskEditor(a))}>
+          <Icon name="ListTodo" />
+          <span>新建任务</span>
+        </button>
         <button
           className="menu-row"
           onClick={() => act(() => projectEditor(a))}
         >
           <Icon name="FolderKanban" />
           <span>新建项目</span>
-        </button>
-        <button className="menu-row" onClick={() => act(() => taskEditor(a))}>
-          <Icon name="ListTodo" />
-          <span>新建任务</span>
         </button>
         <button className="menu-row" onClick={() => act(a.capture)}>
           <Icon name="Inbox" />

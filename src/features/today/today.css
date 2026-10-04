@@ -2,6 +2,56 @@
   max-width: 1000px;
   margin: 0 auto;
 }
+.today-title-line {
+  flex: 1;
+}
+.today-title-line > .today-progress {
+  border: 0;
+  padding: 0;
+}
+.today-slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.today-slot-empty a {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 48px;
+  color: var(--muted);
+}
+.today-inline-project,
+.timeline-marker,
+.capture-prompt {
+  display: none;
+}
+.action-surface-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.action-estimate {
+  color: var(--muted);
+  font-size: 13px;
+}
+.action-surface-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.capture-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
 .today-head {
   display: flex;
   align-items: baseline;

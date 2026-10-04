@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useApp } from "../../ui";
+import { Icon, useApp } from "../../ui";
 export function QuickCapture({ date }) {
   const app = useApp();
   const [text, setText] = useState(""),
@@ -25,9 +25,15 @@ export function QuickCapture({ date }) {
     }
   }
   return (
-    <section className="today-section" aria-labelledby="capture-heading">
+    <section
+      className="today-section today-capture-section"
+      aria-labelledby="capture-heading"
+    >
       <h2 id="capture-heading">快速记录</h2>
       <form className="today-capture" onSubmit={submit}>
+        <span className="capture-prompt" aria-hidden="true">
+          <Icon name="Plus" size={18} />
+        </span>
         <input
           aria-label="快速记录内容"
           placeholder="先记下来，稍后在收件箱整理"
@@ -36,10 +42,12 @@ export function QuickCapture({ date }) {
           onChange={(e) => setText(e.target.value)}
         />
         <button
-          className="button secondary small"
+          className="capture-submit"
+          aria-label={busy ? "保存中" : "记下"}
           disabled={busy || !text.trim()}
         >
-          {busy ? "保存中" : "记下"}
+          <Icon name="ArrowUp" size={19} />
+          <span>{busy ? "保存中" : "记下"}</span>
         </button>
       </form>
       {error && <p role="alert">{error}</p>}

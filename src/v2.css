@@ -601,3 +601,6 @@
     scroll-behavior: auto !important;
   }
 }
+.project-index {
+  display: none;
+}

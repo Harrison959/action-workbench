@@ -34,17 +34,32 @@ export function Today() {
   return (
     <div className="today-page">
       <header className="today-head">
-        <h1>今日行动</h1>
-        <time dateTime={date}>{date}</time>
+        <time dateTime={date} className="today-date">
+          {new Intl.DateTimeFormat("zh-CN", {
+            timeZone: "Asia/Shanghai",
+            month: "long",
+            day: "numeric",
+          }).format(new Date(date + "T12:00:00+08:00"))}
+          {" · "}
+          {new Intl.DateTimeFormat("zh-CN", {
+            timeZone: "Asia/Shanghai",
+            weekday: "short",
+          }).format(new Date(date + "T12:00:00+08:00"))}
+        </time>
+        <div className="today-title-line">
+          <h1>今日行动</h1>
+          <TodayProgress tasks={planned} />
+        </div>
       </header>
-      <NextAction action={action} />
-      <TopThree
-        tasks={todayTopThree(tasks, date)}
-        overflow={planned.filter((t) => t.top).length > 3}
-      />
-      <TodayTimeline items={todayTimeline(app.list("event"), date)} />
-      <QuickCapture date={date} />
-      <TodayProgress tasks={planned} />
+      <div className="today-workspace">
+        <NextAction action={action} />
+        <TopThree
+          tasks={todayTopThree(tasks, date)}
+          overflow={planned.filter((t) => t.top).length > 3}
+        />
+        <TodayTimeline items={todayTimeline(app.list("event"), date)} />
+        <QuickCapture date={date} />
+      </div>
     </div>
   );
 }

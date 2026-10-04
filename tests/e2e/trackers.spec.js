@@ -15,7 +15,7 @@ test("Data reads old records without writes; source routes, range, backup, refre
   ).toBeVisible();
   await expect(
     page.locator('[data-tracker="body.weight"] .tracker-value'),
-  ).toHaveText("未记录");
+  ).toHaveText("—");
   const before = await page.evaluate(async () => {
     const db = await import("/src/db.js"),
       { today } = await import("/src/domain.js");

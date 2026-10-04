@@ -143,9 +143,6 @@ export function TaskRow({
       className={"task-row " + (task.status === "done" ? "done" : "")}
       data-task-id={task.id}
     >
-      {variant === "today" && (
-        <span className="today-task-number">{number}</span>
-      )}
       <button
         className="check"
         disabled={busy || task.status === "cancelled"}
@@ -174,6 +171,11 @@ export function TaskRow({
       </button>
       <div className="task-row-content">
         <button className="task-text" onClick={() => taskEditor(a, task)}>
+          {variant === "today" && (
+            <span className="today-task-number">
+              {String(number).padStart(2, "0")}
+            </span>
+          )}
           <strong>{task.title}</strong>
           <span>
             {variant !== "today" && (
@@ -186,6 +188,9 @@ export function TaskRow({
               </>
             )}
             {task.minutes || 25} 分钟
+            {variant === "today" && project && (
+              <span className="today-inline-project"> · {project.title}</span>
+            )}
             {variant === "today" && task.status === "done" && " · 已完成"}
             {task.date && task.date !== today() && <> · {task.date}</>}
             {task.status === "cancelled" && " · 已取消"}

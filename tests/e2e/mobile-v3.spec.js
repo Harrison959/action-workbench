@@ -221,19 +221,19 @@ test("More has three groups, readable tokens and touch targets at 360px", async 
     background: getComputedStyle(document.documentElement).backgroundColor,
   }));
   expect(typography).toEqual({
-    size: "26px",
-    bg: "#f3f4f2",
-    background: "rgb(243, 244, 242)",
+    size: "29px",
+    bg: "#f1f2f0",
+    background: "rgb(241, 242, 240)",
   });
   const add = await page.locator(".add-primary-icon").boundingBox();
-  expect(add.width).toBe(52);
-  expect(add.height).toBe(52);
+  expect(add.width).toBe(48);
+  expect(add.height).toBe(48);
   const bar = await nav(page).boundingBox();
-  expect(bar.x).toBe(12);
-  expect(bar.width).toBe(336);
-  expect(740 - (bar.y + bar.height)).toBe(12);
-  expect(bar.y - add.y).toBeGreaterThanOrEqual(6);
-  expect(bar.y - add.y).toBeLessThanOrEqual(8);
+  expect(bar.x).toBe(0);
+  expect(bar.width).toBe(360);
+  expect(740 - (bar.y + bar.height)).toBe(0);
+  expect(add.y).toBeGreaterThanOrEqual(bar.y);
+  expect(add.y + add.height).toBeLessThanOrEqual(bar.y + bar.height);
   await noOverflow(page);
   await page.screenshot({ path: ".qa/mobile-v3-more-360.png", fullPage: true });
   await page.locator('.mobile-more a[href="#data"]').click();

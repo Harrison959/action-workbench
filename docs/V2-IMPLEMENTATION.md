@@ -1,6 +1,6 @@
 # V2 架构分析与实施记录
 
-对应需求：根目录 `V2_REDESIGN.md`（用户提供的完整原文）。以下保留各阶段的分析和实施历史。Phase 1–8 与 Phase 9A 已完成；最新工作为手机 Visual Direction Refresh，仅调整视觉表面，不进入 Calendar 或其他后续功能。
+对应需求：根目录 `V2_REDESIGN.md`（用户提供的完整原文）。以下保留各阶段的分析和实施历史。Phase 1–8 与 Phase 9A 已完成；最新工作为 Phase 9B 手机 Visual Architecture Redesign，重构目标页面的视觉结构，保留原业务、数据与导航行为，不进入 Calendar 或其他后续功能。
 
 ## 现状与复用
 
@@ -513,3 +513,51 @@ Calendar 布局、日期选择与更完整的手机日历体验留给 Phase 9B�
 - 使用隔离测试数据查看 Pixel 7 的 More、Today、Data、两个项目列表、身体测量 Sheet，以及 360px More、暗色 Add、短屏键盘契约截图；目标页面无横向溢出、无 pageerror。旧字段、导入导出与读取逻辑继续由现有回归覆盖。
 
 以上为本地验收；尚未验证小米真机键盘、系统安全区与覆盖安装，cap sync 不等于 APK 原生构建或真机验收。未执行真实 Supabase 双端同步。远端 CI 与发布状态以本轮提交的 GitHub Actions 运行为准。停止于视觉调整，不进入 Calendar 重构。
+
+## Phase 9B：Visual Architecture Redesign
+
+基于 main d1cdb9a，目标为 Editorial Productivity / Precision Tool。此次改动包含 Today、Data、Projects 的真实 DOM 结构调整，不沿用上一轮只覆盖表面 CSS 的方式。修改范围是呈现与交互区域，未修改 IndexedDB、Supabase、同步协议、Tracker Reader、Insight / Weekly Review 规则或 Android 返回处理。
+
+### 视觉与结构
+
+- Today：日期独立为轻量 metadata，标题行放轻量完成进度。当前行动使用唯一主要 raised action-surface，空状态约 133px；今日重点始终有 01 / 02 / 03 三个槽位，空槽位可用键盘进入原计划页面。任务标题和编号共用详情按钮，完成 / 专注为独立 44px 点击区。时间线使用时间列、竖线、标记点及内容；快速记录改成一体 inset command field，右侧保存动作内嵌，仍写原 Inbox。
+- Data：身体与健康、学习、生活、收入四个分组，普通指标行 64px，共用组表面。指标名和值在同一个可点击原业务详情链接内，历史展开和记录是清晰的 44px 行操作；情绪方向保留标签，历史说明在展开内容中。所有定义和聚合仍来自现有 Reader，没有复制表单或业务数据。
+- Projects：编号、名称与状态、结果、下一步和 2px 进度条组成 slab list。进行中项目使用低对比 tonal surface，无普通白卡片或大圆角外壳；项目过滤、归档、关联任务和 nextAction 逻辑保持原样。
+- Dock：贴屏幕底部，左右与下沿零偏移，上缘轻亮边，顶部圆角 10px；中央 Add 48px，实心石墨，保持原安全区和导航触摸区域。取消突出底栏的 Add 位移。
+- More / Sheet：三个 grouped panel，组内行共用 surface；Sheet 保留 handle、独立内容滚动及 footer 层级。Add 将新建任务作为首个全宽行动，其余仍为既有项目、Inbox、日程、Data 操作；未新增一级导航。
+- 去除目标页面的 section 横线，保留真正列表内部的低对比 separator。普通内容不使用外部阴影，raised 只用于当前行动、Dock、重要操作；输入使用 inset，dialog / sheet 使用 overlay。页面标题 29px/700、section 18px/650，数字 tabular，主要 UI 为 sans-serif；本机 Chromium 实际中文字体检查为 Microsoft YaHei，数字为 DM Sans。
+
+浅色系统：app-bg #F1F2F0、surface #F8F9F7、raised #FDFDFC、accent #344250、accent-strong #26313C、accent-soft #E3E7EA、text #17202A、muted #5F6973、faint #8B939A、border #D6DADD。保留暗色与 reduced-motion。Calendar 仅接受共用 token / 控件样式，没有重做其布局。
+
+### 修改文件
+
+- src/features/today/Today.jsx、TodaySections.jsx、QuickCapture.jsx、today.css。
+- src/features/tasks/TaskComponents.jsx：仅 today 变体的编号与项目说明呈现。
+- src/features/trackers/Data.jsx、trackers.css。
+- src/features/projects/Projects.jsx。
+- src/components/AppNavigation.jsx、src/mobile.css、src/v2.css。
+- tests/e2e/mobile-v3.spec.js、today.spec.js、trackers.spec.js、visual-architecture.spec.js。
+- docs/V2-IMPLEMENTATION.md。用户已有两份使用说明保持不动。
+
+### 截图与验证
+
+新增手机结构验收覆盖空槽位键盘操作、任务编号区域点击详情、完成后当前行动更新、原 Inbox 写入、竖向时间线、64px 指标行、原身体录入、原业务详情、刷新后旧字段保留、无 trackerEntry、无 pageerror。使用隔离测试数据库和空云配置，不访问用户已有记录。
+
+六张实际 Pixel 7（412×839）截图位于 .qa/phase9b：today-empty.png、today-with-data.png、projects.png、data.png、more.png、add-sheet.png。overview.png 仅拼排这六张真实截图；截图等待原 5.5 秒成功提示结束与 Sheet 动画完成，未通过隐藏控件改变页面。宽屏、360px、长标题、暗色、短屏表单与既有业务路径沿用完整回归。
+
+| 验证 | 最终结果 |
+| --- | --- |
+| npm test | 78 项通过 |
+| npm run test:e2e -- --workers=2 | 57 项通过，15 项按设备范围跳过，无失败 |
+| npm run test:production | 10 项通过 |
+| npm run build | 通过；入口 JS 518.41kB / gzip 153.42kB，CSS 66.00kB / gzip 14.20kB |
+| npm run android:sync | 通过；四个既有插件与最终 Web assets 同步成功 |
+| git diff --check | 通过 |
+
+完整四并发回归曾出现命令测试在首次空页面等待 Today 标题超时；没有修改该用例或放宽断言，使用两个 worker 完整复跑后全部通过。新增截图验收修正了身体记录的历史口径假设，并将截图等待设置为 10 秒以覆盖既有 5.5 秒通知；未更改产品通知时长。
+
+### 验证边界
+
+身体旧记录没有测量时间，同日多条继续按 Reader 原有稳定 ID 顺序选择并提示无法确认先后；此次不将保存时间伪装为测量时间。新验收确认两个真实 body record 均保留，而非断言最后保存的值必然作为当日显示值。
+
+Android sync 只验证 Capacitor Web assets / 插件同步；未验收小米真机 IME、系统安全区、通知点击、APK 编译或覆盖安装。未验证真实 Supabase 双端环境；本阶段未改其代码与 schema。主入口 bundle 既有 >500kB 提示保留，本轮未做范围外构建拆分。当前改动为本地工作区结果，不声明 GitHub 已发布。停止于 Phase 9B。

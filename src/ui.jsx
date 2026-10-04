@@ -6,6 +6,8 @@ import React, {
   useContext,
 } from "react";
 import { Icons } from "./icons";
+import { parentRoute } from "./navigation";
+import { navigate, backToParent } from "./navigationHistory";
 export const Context = createContext(null);
 export const useApp = () => useContext(Context);
 export function Icon({ name = "ArrowUpRight", size = 19, ...props }) {
@@ -29,16 +31,57 @@ export function Button({
     </button>
   );
 }
-export function Link({ to, children, className = "", ...props }) {
+export function Link({
+  to,
+  children,
+  className = "",
+  onClick,
+  replace = false,
+  ...props
+}) {
   return (
-    <a href={"#" + to} className={className} {...props}>
+    <a
+      href={"#" + to}
+      className={className}
+      {...props}
+      onClick={(event) => {
+        onClick?.(event);
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey ||
+          props.target ||
+          props.download
+        )
+          return;
+        event.preventDefault();
+        navigate(to, { replace });
+      }}
+    >
       {children}
     </a>
   );
 }
 export function PageHead({ eyebrow, title, description, action }) {
+  const app = useApp();
+  const parent = app?.route && parentRoute(app.route);
   return (
-    <header className="page-head">
+    <header className="page-head mobile-page-header">
+      {parent && (
+        <div className="mobile-page-back">
+          <button
+            type="button"
+            onClick={() => backToParent()}
+            aria-label={"返回" + parent.label}
+          >
+            <Icon name="ChevronLeft" size={22} />
+            <span>{parent.label}</span>
+          </button>
+        </div>
+      )}
       <div>
         <div className="eyebrow">{eyebrow}</div>
         <h1>{title}</h1>
@@ -77,14 +120,18 @@ export function Empty({
     </div>
   );
 }
-export function Tabs({ items, value, onChange }) {
+export function Tabs({ items, value, onChange, appearance = "tabs" }) {
   const refs = useRef([]);
   const select = (index) => {
     onChange(items[index].id || items[index]);
     refs.current[index]?.focus();
   };
   return (
-    <div className="tabs" role="tablist" aria-label="切换视图">
+    <div
+      className={"tabs" + (appearance === "segmented" ? " segmented" : "")}
+      role="tablist"
+      aria-label="切换视图"
+    >
       {items.map((i, index) => (
         <button
           key={i.id || i}
@@ -268,11 +315,42 @@ export function RecordList({ rows, render, empty, edit, onRemove }) {
     <Empty text={empty} />
   );
 }
+export function useSheetViewport(ref) {
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    const resize = () => {
+      const el = ref.current;
+      if (!el) return;
+      el.style.setProperty(
+        "--sheet-viewport-height",
+        (viewport?.height || innerHeight) + "px",
+      );
+      el.style.setProperty(
+        "--sheet-bottom-inset",
+        Math.max(
+          0,
+          innerHeight -
+            ((viewport?.height || innerHeight) + (viewport?.offsetTop || 0)),
+        ) + "px",
+      );
+    };
+    resize();
+    viewport?.addEventListener("resize", resize);
+    viewport?.addEventListener("scroll", resize);
+    window.addEventListener("resize", resize);
+    return () => {
+      viewport?.removeEventListener("resize", resize);
+      viewport?.removeEventListener("scroll", resize);
+      window.removeEventListener("resize", resize);
+    };
+  }, [ref]);
+}
 export function FormDialog({ spec, onClose }) {
   const dialog = useRef(),
     saving = useRef(false),
     errorRef = useRef(),
     key = "action-draft:" + spec.key;
+  useSheetViewport(dialog);
   const [values, setValues] = useState(() => {
       try {
         const d = JSON.parse(sessionStorage.getItem(key));
@@ -333,12 +411,13 @@ export function FormDialog({ spec, onClose }) {
   return (
     <dialog
       ref={dialog}
-      className="dialog"
+      className="dialog form-dialog"
       aria-labelledby="form-dialog-title"
       onClick={(e) => {
         if (e.target === dialog.current && !saving.current) onClose();
       }}
     >
+      <div className="sheet-handle" aria-hidden="true" />
       <div className="dialog-top">
         <div>
           <h2 id="form-dialog-title">{spec.title}</h2>
@@ -353,81 +432,84 @@ export function FormDialog({ spec, onClose }) {
         </button>
       </div>
       <form
+        className="sheet-form"
         onSubmit={save}
         aria-busy={busy}
         aria-describedby={error ? "form-error" : undefined}
       >
-        <div className="form-fields">
-          {spec.description && <p className="muted">{spec.description}</p>}
-          {spec.fields.map((f) => {
-            if (f.show && !f.show(values)) return null;
-            const common = {
-              id: "f-" + f.name,
-              name: f.name,
-              required: f.required,
-              disabled: busy,
-              value: values[f.name] ?? "",
-              onChange: (e) =>
-                setValues((v) => ({ ...v, [f.name]: e.target.value })),
-              min: f.min,
-              max: f.max,
-              step: f.step || (f.type === "number" ? "any" : undefined),
-              placeholder: f.placeholder,
-              autoComplete: f.autoComplete || "off",
-            };
-            return (
-              <label
-                key={f.name}
-                className={"field " + (f.wide ? "wide" : "")}
-                htmlFor={common.id}
-              >
-                <span>
-                  {f.label}
-                  {f.required && <i> *</i>}
-                </span>
-                {f.type === "select" ? (
-                  <select {...common}>
-                    {(f.options || []).map((o) => (
-                      <option key={o.value ?? o} value={o.value ?? o}>
-                        {o.label ?? o}
-                      </option>
-                    ))}
-                  </select>
-                ) : f.type === "textarea" ? (
-                  <textarea {...common} rows={3} />
-                ) : f.type === "checkbox" ? (
-                  <input
-                    type="checkbox"
-                    disabled={busy}
-                    id={common.id}
-                    checked={!!values[f.name]}
-                    onChange={(e) =>
-                      setValues((v) => ({ ...v, [f.name]: e.target.checked }))
-                    }
-                  />
-                ) : (
-                  <input
-                    {...common}
-                    type={f.type || "text"}
-                    inputMode={f.type === "number" ? "decimal" : undefined}
-                  />
-                )}{" "}
-                {f.help && <small>{f.help}</small>}
-              </label>
-            );
-          })}
+        <div className="sheet-content">
+          <div className="form-fields">
+            {spec.description && <p className="muted">{spec.description}</p>}
+            {spec.fields.map((f) => {
+              if (f.show && !f.show(values)) return null;
+              const common = {
+                id: "f-" + f.name,
+                name: f.name,
+                required: f.required,
+                disabled: busy,
+                value: values[f.name] ?? "",
+                onChange: (e) =>
+                  setValues((v) => ({ ...v, [f.name]: e.target.value })),
+                min: f.min,
+                max: f.max,
+                step: f.step || (f.type === "number" ? "any" : undefined),
+                placeholder: f.placeholder,
+                autoComplete: f.autoComplete || "off",
+              };
+              return (
+                <label
+                  key={f.name}
+                  className={"field " + (f.wide ? "wide" : "")}
+                  htmlFor={common.id}
+                >
+                  <span>
+                    {f.label}
+                    {f.required && <i> *</i>}
+                  </span>
+                  {f.type === "select" ? (
+                    <select {...common}>
+                      {(f.options || []).map((o) => (
+                        <option key={o.value ?? o} value={o.value ?? o}>
+                          {o.label ?? o}
+                        </option>
+                      ))}
+                    </select>
+                  ) : f.type === "textarea" ? (
+                    <textarea {...common} rows={3} />
+                  ) : f.type === "checkbox" ? (
+                    <input
+                      type="checkbox"
+                      disabled={busy}
+                      id={common.id}
+                      checked={!!values[f.name]}
+                      onChange={(e) =>
+                        setValues((v) => ({ ...v, [f.name]: e.target.checked }))
+                      }
+                    />
+                  ) : (
+                    <input
+                      {...common}
+                      type={f.type || "text"}
+                      inputMode={f.type === "number" ? "decimal" : undefined}
+                    />
+                  )}{" "}
+                  {f.help && <small>{f.help}</small>}
+                </label>
+              );
+            })}
+          </div>
+          {error && (
+            <p
+              className="error"
+              role="alert"
+              id="form-error"
+              ref={errorRef}
+              tabIndex={-1}
+            >
+              {error}
+            </p>
+          )}
         </div>
-        {error && (
-          <p
-            className="error"
-            role="alert"
-            id="form-error"
-            ref={errorRef}
-            tabIndex={-1}
-          >
-            {error}
-          </p>
-        )}
         <div className="form-footer">
           <small>关闭后保留本次草稿</small>
           <Button

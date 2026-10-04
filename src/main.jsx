@@ -8,6 +8,7 @@ import { initNotifications, scheduleEvents } from "./notifications";
 import { today } from "./domain";
 import { Context, Icon, FormDialog, textField } from "./ui";
 import { parseRoute } from "./navigation";
+import { installRouteHistory } from "./navigationHistory";
 import {
   AppNavigation,
   MobileNavigation,
@@ -15,6 +16,7 @@ import {
 } from "./components/AppNavigation";
 import "./styles.css";
 import "./v2.css";
+import "./mobile.css";
 const pageMap = {
   today: Today,
   projects: lazy(() =>
@@ -110,6 +112,7 @@ function App() {
     }
   }, []);
   useEffect(() => {
+    const stopHistory = installRouteHistory();
     refresh();
     const off = db.subscribe(refresh);
     const hash = () => {
@@ -121,6 +124,7 @@ function App() {
     window.addEventListener("hashchange", hash);
     return () => {
       off();
+      stopHistory();
       window.removeEventListener("hashchange", hash);
     };
   }, []);
@@ -135,7 +139,14 @@ function App() {
   }, [theme]);
   useEffect(() => {
     const off = watchSync(setSyncText);
-    initNotifications().catch(() => {});
+    let disposed = false;
+    let stopNotifications;
+    initNotifications()
+      .then((stop) => {
+        if (disposed) stop?.();
+        else stopNotifications = stop;
+      })
+      .catch(() => {});
     sync();
     const int = setInterval(sync, 30000);
     const onVisible = () => {
@@ -147,6 +158,8 @@ function App() {
     window.addEventListener("online", sync);
     document.addEventListener("visibilitychange", onVisible);
     return () => {
+      disposed = true;
+      stopNotifications?.();
       off();
       clearInterval(int);
       window.removeEventListener("online", sync);

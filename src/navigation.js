@@ -28,6 +28,38 @@ const otherPages = [
   "insights",
 ];
 
+export const MOBILE_TABS = ["today", "projects", "review", "more"];
+const PARENTS = {
+  tasks: "today",
+  plan: "today",
+  goals: "today",
+  focus: "today",
+  cover: "today",
+  calendar: "more",
+  inbox: "more",
+  data: "more",
+  insights: "more",
+  settings: "more",
+  sales: "more",
+  income: "data",
+  sleep: "data",
+  courses: "data",
+  english: "data",
+  fitness: "data",
+  guitar: "data",
+  emotion: "data",
+};
+
+// Route hierarchy is independent of record storage and browser history length.
+export function parentRoute(route) {
+  const page =
+    route.page === "projects" && route.id ? "projects" : PARENTS[route.page];
+  return page ? { to: page, label: pageTitle(page) } : null;
+}
+export function isMobileTab(route) {
+  return !route.id && MOBILE_TABS.includes(route.page);
+}
+
 // Keep hashes so Pages subpaths, existing bookmarks and Android notifications work.
 export function parseRoute(hash = "") {
   const [path, query = ""] = hash.replace(/^#/, "").split("?");
@@ -56,8 +88,9 @@ export function navigationGroup(page) {
   return "more";
 }
 export function mobileGroup(page) {
-  const group = navigationGroup(page);
-  return ["today", "projects", "review"].includes(group) ? group : "more";
+  if (MOBILE_TABS.includes(page)) return page;
+  const parent = PARENTS[page];
+  return parent ? mobileGroup(parent) : "more";
 }
 export function pageTitle(page) {
   return (

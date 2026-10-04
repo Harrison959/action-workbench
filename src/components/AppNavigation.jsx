@@ -1,7 +1,7 @@
 import { projectEditor } from "../features/projects/editor";
 import { CommandTrigger } from "../features/command/CommandCenter";
 import React, { useEffect, useRef } from "react";
-import { Icon, Link, useApp } from "../ui";
+import { Icon, Link, useApp, useSheetViewport } from "../ui";
 import {
   PRIMARY_NAV,
   navigationGroup,
@@ -87,7 +87,9 @@ export function MobileNavigation({ page, onAdd }) {
       ].map(([id, label, icon]) =>
         id === "add" ? (
           <button key={id} onClick={onAdd} aria-label="添加">
-            <Icon name={icon} />
+            <span className="add-primary-icon">
+              <Icon name={icon} size={24} />
+            </span>
             <span>{label}</span>
           </button>
         ) : (
@@ -97,7 +99,7 @@ export function MobileNavigation({ page, onAdd }) {
             className={selected === id ? "active" : ""}
             aria-current={selected === id ? "page" : undefined}
           >
-            <Icon name={icon} />
+            <Icon name={icon} size={22} />
             <span>{label}</span>
           </Link>
         ),
@@ -108,7 +110,9 @@ export function MobileNavigation({ page, onAdd }) {
 export function AddMenu({ onClose }) {
   const a = useApp(),
     ref = useRef();
+  useSheetViewport(ref);
   useEffect(() => {
+    const previous = document.activeElement;
     const el = ref.current;
     el.showModal();
     const cancel = (e) => {
@@ -116,7 +120,11 @@ export function AddMenu({ onClose }) {
       onClose();
     };
     el.addEventListener("cancel", cancel);
-    return () => el.removeEventListener("cancel", cancel);
+    return () => {
+      el.removeEventListener("cancel", cancel);
+      el.close();
+      if (previous?.isConnected) previous.focus({ preventScroll: true });
+    };
   }, []);
   const act = (fn) => {
     onClose();
@@ -131,6 +139,7 @@ export function AddMenu({ onClose }) {
         if (e.target === ref.current) onClose();
       }}
     >
+      <div className="sheet-handle" aria-hidden="true" />
       <div className="dialog-top">
         <h2 id="add-title">添加</h2>
         <button className="icon-button" aria-label="关闭" onClick={onClose}>

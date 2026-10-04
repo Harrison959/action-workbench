@@ -1,6 +1,6 @@
 # V2 架构分析与实施记录
 
-对应需求：根目录 `V2_REDESIGN.md`（用户提供的完整原文）。Phase 1、Phase 2、Phase 3 已完成并合并；本次后续工作仅实施 Phase 4（Command Center），停止于 Phase 4。
+对应需求：根目录 `V2_REDESIGN.md`（用户提供的完整原文）。以下保留各阶段的分析和实施历史。Phase 1–8 已完成；最新工作为 Phase 9A：Mobile UI V3 Foundation，停止于 Phase 9A。
 
 ## 现状与复用
 
@@ -400,3 +400,72 @@ Sleep 的近七天日均复用 createTrackerReader，使用有效日值和 recor
 真实 Supabase 双端往返、Android 真机/通知权限/覆盖安装/键盘尚未验收。本机未找到 Java 和 Android SDK，因此未运行 assembleDebug，不将 cap sync 当作原生 APK 构建通过。现仓库没有 Web manifest / service worker；离线 IndexedDB 录入保持可用，Web 冷启动或首次访问未缓存路由的离线可用性没有承诺，缺 chunk 会显示恢复入口。Android 安装包的 dist assets 包含各路由 chunk。
 
 当前 Web V2 核心闭环已经具备个人长期日常使用基础；全端正式验收仍需真实云同步往返及 Android 真机测试。没有进入下一阶段或新增功能。
+
+## Phase 9A：Mobile UI V3 Foundation
+
+### 范围与基础
+
+基于 main a9f831a（Phase 8）实施。先检查共享 UI、导航、主壳、两层旧样式、Capacitor backButton、各页面 Header / 入口，以及既有回归测试。保留 hash router、旧 schedule / summary 通知别名、桌面导航、业务 editor、离线 IndexedDB、Supabase 与导入导出。未修改 domain / db / cloud、kind 白名单、SQL、原生配置或依赖；未增加业务模块、Tracker、Insight 或 AI。上次生成的两份未提交使用说明保持原文件，不覆盖。
+
+### 导航、历史与 Android 返回
+
+新增 navigationHistory.js 作为轻量导航层，不替换路由库。共享 Link 保留真实 href 与修饰键/新窗口行为；普通点击调用 navigate。760px 及以下进入 today / projects / review / more 的根视图采用 replaceState；二级页 pushState。项目状态筛选与 Command Center 的导航调用同一方法。原有直接 hash 写入继续工作，并只标记浏览器 history.state 的导航元数据，不保存业务记录。
+
+父级集中在 navigation.js：
+
+| 页面 | 父级 |
+| --- | --- |
+| Project Detail | Projects |
+| Tasks / Plan / Goals / Focus / Cover | Today |
+| Calendar / Inbox / Data / Insights / Settings / Sales | More |
+| Income / Sleep / Courses / English / Fitness / Guitar / Emotion | Data |
+
+mobileGroup 沿相同父级计算底栏选中项。已确认真实前一个 history entry 为父级时，使用 history.back，保留浏览器前进；如果此前一级 Tab 被 replace、直接打开深链接或刷新后无法确认前一 entry，则 replace 到父级。能安全保留的项目列表 status 查询继续保留。不根据 history.length 假定有可返回的父级，也不退离当前 Pages 子路径。浏览器自己的 Back / Forward 保持正常。
+
+官方 App.backButton 调用 handleAppBack：有打开的 dialog 时发出 cancel，由已有关闭/保存锁决定是否关闭；二级页返回父级；四个根 Tab 调用 App.minimizeApp，不倒退根 Tab 访问历史。新增 listener 清理，保留通知调度、权限、ID 与旧 extra.route。没有 touchmove 监听或自定义侧滑手势。
+
+### 手机 Header、触摸与底栏
+
+手机隐藏重复品牌 topbar，以现有 PageHead / Today 标题作为唯一标题来源；二级 PageHead 增加父级返回行，隐藏 Project Detail 的旧重复返回链接；桌面 Header 保留。返回、图标按钮、文字链接、Tabs、编辑/归档、Today / Data / More 操作均至少 44×44；表单输入至少 48px 高。既有 checkbox 用可点击 label，保留键盘行为。
+
+底栏仍为今天、项目、添加、复盘、更多。普通项至少 56px 高，active 使用 accent-soft pill；中间添加图标块 52×52、16px 圆角，浅色主题深绿底白 Plus，向底栏上方突出约 7px。保留安全区、页面底部空间与原 Add Menu 操作，不新增一级导航。
+
+### More 与短选项
+
+手机 More 改为计划 / 记录 / 工具三个 surface 列表组，圆角 14px，每行至少 64px，图标 + 标题 + 短描述 + chevron。计划保留任务、提前安排、目标；记录提供 Data、Calendar、Inbox，并保留 Sales 独特业务入口；工具保留 Insights、归档项目、设置与同步。封面保留低调页尾链接。桌面 More 继续原有两组结构。
+
+Tabs 增加可复用 appearance="segmented"，仅在项目的五项状态筛选落地。保留 roving focus、左右键/Home/End 与 aria-selected；没有全量替换 select，没有重做日期输入或 Calendar。
+
+### Bottom Sheet 与手机视觉层
+
+新增 mobile.css，主要规则仅在 max-width:760px 生效，不重写 styles.css / v2.css。浅色主题采用用户指定的九项颜色，旧 bg / panel / card / wash / green / line 通过 alias 兼容；保留匹配的暗色主题。控件/按钮/列表组/面板圆角为 10/12/14/20px，间距使用 4/8/12/16/20/24/32。页面标题 26px/600，section 18px/600，默认正文 15px，caption 13px，常用 metadata 至少 12px。补齐任务时长、统计标签、计划提示、版本信息、日程时间、Focus footer 等旧 10–11px 文字；日历仅接受共用字号与触摸修正。
+
+FormDialog 和 AddMenu 共用视觉 handle（不可拖拽）。FormDialog 仅增加 sheet-content 包装：内容独立滚动，footer 在滚动内容之外，主保存按钮全宽且至少 48px；保留草稿、错误提示、保存锁与关闭后焦点恢复。AddMenu 补齐焦点恢复与 listener 清理。useSheetViewport 使用 visualViewport / resize 的局部 CSS 变量调整面板可用高度及键盘下沿偏移；不接入第三方键盘/手势插件。sheet 180ms 的 opacity / translateY，按钮 120ms 反馈，遵守 reduced-motion。
+
+### 修改文件
+
+- 新增 src/mobile.css、src/navigationHistory.js。
+- 修改 src/ui.jsx、src/navigation.js、src/components/AppNavigation.jsx、src/main.jsx、src/notifications.js、src/icons.js。
+- 小范围修改 src/pages/NavigationPages.jsx、src/features/projects/Projects.jsx、src/features/command/actions.js。
+- 新增 tests/navigation-history.test.js、tests/e2e/mobile-v3.spec.js、tests/production/mobile-v3.spec.js。
+- 补充 tests/e2e/hardening.spec.js 的手机入口与真实旧记录触摸/字号检查；更新本实施记录。
+
+### 最终验证
+
+| 命令 | 结果 |
+| --- | --- |
+| npm test | 78 项通过 |
+| npm run test:e2e | 56 项通过，14 项按设备范围跳过，无失败 |
+| npm run test:production | 10 项通过 |
+| npm run build | 通过；最终入口 516.86kB / gzip 153.09kB，既有 >500kB 提示保留 |
+| npm run android:sync | 通过；最终 dist 已复制，四个既有 Capacitor 插件同步成功 |
+
+新增 8 组导航单测：一级 replace/桌面 push、父级定义、深链接、浏览器前后、旧 hash、根 Tab replace 后的失效父级提示、modal-first 与 busy cancel、根层 minimize。新增六组手机 E2E：多 Tab 不增长历史、真实项目详情返回与 segmented 键盘操作、modal/Add 草稿焦点、More/44px/52px/360px、短屏独立滚动与可见保存、暗色及 reduced-motion。原“真实一天”、旧备份/同步、原 kind/字段、20 个目标页面长中文记录与周复盘继续通过。
+
+生产测试验证 /action-workbench/ 根 Tab 历史、刷新后父级、旧 hash、懒加载资源路径；正常路径没有 pageerror / 资源 404。查看了 More、Today、Data、Projects、暗色 Add、短屏 Sheet 的实际 QA 截图。测试只使用隔离浏览器/空云配置；没有读取或修改用户已有本机记录。
+
+### 验证边界与 Phase 9B
+
+Android 返回测试执行的是与 App listener 相同的 handler，根层 minimize 使用替身；键盘测试缩小视口并模拟 visualViewport.height，不能代替小米真机 IME、系统侧滑、通知点击、安全区、覆盖安装验收。本机命令环境未发现 java/adb，未运行 assembleDebug，也未生成本阶段 APK；cap sync 不能当作原生构建成功。真实 Supabase 双端同步仍未进行，本阶段保留既有离线/CAS/SQL 回归。
+
+Calendar 布局、日期选择与更完整的手机日历体验留给 Phase 9B；未全量替换业务 select，handle 不支持拖拽，未新增手势。Web 首次离线访问和旧 SVG 图表比例限制沿用 Phase 8 边界。本阶段以上为本地验收结果；远端 CI 与发布状态以对应提交的 GitHub Actions 运行为准。停止于 Phase 9A。

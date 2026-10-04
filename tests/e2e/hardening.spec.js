@@ -16,7 +16,10 @@ const go = async (page, route) => {
   await page.evaluate((route) => {
     location.hash = route;
   }, route);
-  await expect(page.locator('main')).toHaveAttribute('data-page', route.split(/[/?]/)[0]);
+  await expect(page.locator("main")).toHaveAttribute(
+    "data-page",
+    route.split(/[/?]/)[0],
+  );
   await expect(page.locator("main h1")).toBeVisible();
 };
 const noOverflow = async (page) =>
@@ -75,7 +78,7 @@ test("a real day: decide, focus, project, body, study, capture, review and reloa
       .getByRole("navigation", { name: "手机导航" })
       .getByRole("link", { name: "更多", exact: true })
       .click();
-    await page.getByRole("link", { name: /数据 收入/ }).click();
+    await page.locator('.mobile-more a[href="#data"]').click();
   } else
     await page
       .getByRole("navigation", { name: "主导航" })
@@ -279,6 +282,22 @@ test("360px all pages with long legacy records, empty states and a short form vi
     await go(page, route);
     await noOverflow(page);
     await expect(page.locator("main")).not.toContainText(/undefined|NaN/);
+    // Mobile V3: real legacy rows must not bring back undersized controls/captions.
+    const tiny = await page.locator("main").evaluate((main) =>
+      [...main.querySelectorAll("*")].flatMap((el) => {
+        const r = el.getBoundingClientRect();
+        if (!r.width || !r.height) return [];
+        const text = [...el.childNodes]
+          .filter((n) => n.nodeType === 3)
+          .some((n) => n.textContent.trim());
+        const smallText =
+          text && parseFloat(getComputedStyle(el).fontSize) < 12;
+        const smallTarget =
+          el.matches("button,a,summary") && (r.width < 43.5 || r.height < 43.5);
+        return smallText || smallTarget ? [el.className || el.tagName] : [];
+      }),
+    );
+    expect(tiny, route + " small text/target").toEqual([]);
   }
   await go(page, "review?view=weekly");
   await page

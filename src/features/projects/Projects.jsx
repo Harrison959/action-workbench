@@ -12,6 +12,7 @@ import {
   textField,
 } from "../../ui";
 import { today } from "../../domain.js";
+import { navigate } from "../../navigationHistory";
 import { TaskRow, taskEditor } from "../tasks/TaskComponents";
 import { openTaskFocus } from "../tasks/focus.js";
 import {
@@ -94,8 +95,7 @@ function ProjectList() {
   const tasks = a.list("task");
   const changeStatus = (value) => {
     setStatus(value);
-    location.hash =
-      value === "active" ? "projects" : "projects?status=" + value;
+    navigate(value === "active" ? "projects" : "projects?status=" + value);
   };
   return (
     <>
@@ -109,6 +109,7 @@ function ProjectList() {
         }
       />
       <Tabs
+        appearance="segmented"
         items={[
           ...Object.entries(PROJECT_STATUSES).map(([id, name]) => ({
             id,

@@ -1,0 +1,421 @@
+/* Mobile presentation only. Existing business forms and desktop styles stay shared. */
+.mobile-page-back,
+.sheet-handle,
+.mobile-more {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --app-bg: #f3f4ef;
+    --surface: #fcfcf9;
+    --surface-soft: #e9ede7;
+    --accent: #355747;
+    --accent-soft: #e2eae4;
+    --text: #202722;
+    --muted: #667168;
+    --border: #d8ddd5;
+    --warning: #946247;
+    --on-accent: #fff;
+    --bg: var(--app-bg);
+    --panel: var(--surface);
+    --card: var(--surface);
+    --wash: var(--surface-soft);
+    --green: var(--accent);
+    --line: var(--border);
+    --radius-control: 10px;
+    --radius-button: 12px;
+    --radius-group: 14px;
+    --radius-sheet: 20px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+  }
+  :root[data-theme="dark"] {
+    --app-bg: #181f1b;
+    --surface: #222b25;
+    --surface-soft: #2b352e;
+    --accent: #a5c6b1;
+    --accent-soft: #344b3c;
+    --text: #e7eee8;
+    --muted: #b0beb3;
+    --border: #405045;
+    --warning: #d0aa8b;
+    --on-accent: #17291d;
+    --bg: var(--app-bg);
+    --panel: var(--surface);
+    --card: var(--surface);
+    --wash: var(--surface-soft);
+    --green: var(--accent);
+    --line: var(--border);
+  }
+  body {
+    font-size: 15px;
+  }
+  .app.v2 .topbar {
+    display: none;
+  }
+  .app.v2 main {
+    padding: calc(20px + env(safe-area-inset-top)) 16px
+      calc(112px + env(safe-area-inset-bottom));
+  }
+  .app.v2 .page-head {
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .app.v2 .page-head > div:not(.mobile-page-back) {
+    flex: 1;
+    min-width: 0;
+  }
+  .app.v2 .page-head h1,
+  .app.v2 .today-head h1 {
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .app.v2 .page-head p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .app.v2 .section-head h2,
+  .app.v2 .today-section-head h2,
+  .app.v2 .more-group h2 {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .app.v2 small,
+  .app.v2 .muted,
+  .app.v2 .caption {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .app.v2 .eyebrow,
+  .app.v2 .priority,
+  .app.v2 .tag,
+  .app.v2 .badge,
+  .app.v2 .field-label,
+  .app.v2 .row-sub {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .app.v2 .stat > span,
+  .app.v2 .plan-draft p {
+    font-size: 13px;
+  }
+  .app.v2 .app-version,
+  .app.v2 .project-status {
+    font-size: 12px;
+  }
+  .app.v2 .task-text > span,
+  .app.v2 .task-text > span b,
+  .app.v2 .chart text,
+  .app.v2 .timeline-row time,
+  .app.v2 .focus-footer,
+  .app.v2 .live-label {
+    font-size: 12px;
+  }
+  .app.v2 .plan-banner p {
+    font-size: 13px;
+  }
+  .app.v2 .tracker-name,
+  .app.v2 .tracker-value {
+    font-size: 15px;
+  }
+  .app.v2 .mobile-page-back {
+    display: flex;
+    flex-basis: 100%;
+    margin: -4px 0 0 -8px;
+  }
+  .app.v2 .mobile-page-back button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+    background: transparent;
+    border: 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .app.v2 .project-back {
+    display: none;
+  }
+
+  .app.v2 :is(button, a, summary) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .app.v2 main a {
+    display: inline-flex;
+    align-items: center;
+  }
+  .app.v2 .icon-button {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-button);
+  }
+  .app.v2 .text-link {
+    padding: 8px 4px;
+    font-size: 14px;
+  }
+  .app.v2 .button {
+    border-radius: var(--radius-button);
+    font-size: 14px;
+  }
+  .app.v2 .button:not(.secondary) {
+    color: var(--on-accent);
+  }
+  .app.v2 input:not([type="checkbox"]):not([type="radio"]),
+  .app.v2 select,
+  .app.v2 textarea {
+    font-size: 16px;
+    border-radius: var(--radius-control);
+    min-height: 48px;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .app.v2 :is(.plan-task, .focus-subtasks label, .weekly-priorities label) {
+    min-height: 44px;
+  }
+  .app.v2 button {
+    transition:
+      background-color 120ms,
+      transform 120ms;
+  }
+  .app.v2 button:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .app.v2 .bottom-nav {
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    min-height: 80px;
+    gap: 4px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: none;
+    align-items: center;
+  }
+  .app.v2 .bottom-nav > :is(a, button) {
+    min-height: 56px;
+    min-width: 44px;
+    flex: 1;
+    gap: 4px;
+    border-radius: 12px;
+    color: var(--muted);
+    background: transparent;
+  }
+  .app.v2 .bottom-nav > .active {
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .app.v2 .bottom-nav > .active::before {
+    content: none;
+  }
+  .app.v2 .bottom-nav > :is(a, button) > span {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .app.v2 .bottom-nav .add-primary-icon {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    margin: 0;
+    border-radius: 16px;
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  .app.v2 .bottom-nav > button {
+    position: relative;
+    align-self: stretch;
+    padding: 0;
+    overflow: visible;
+  }
+  .app.v2 .bottom-nav > button > span:last-child {
+    margin-top: 38px;
+  }
+
+  .app.v2 .desktop-more {
+    display: none;
+  }
+  .app.v2 .mobile-more {
+    display: block;
+  }
+  .app.v2 .more-group {
+    margin-bottom: 24px;
+  }
+  .app.v2 .more-group h2 {
+    margin: 0 0 12px;
+  }
+  .app.v2 .more-group .hub-list {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-group);
+    overflow: hidden;
+  }
+  .app.v2 main .menu-row {
+    display: grid;
+  }
+  .app.v2 main .project-list-row {
+    display: grid;
+  }
+  .app.v2 .more-group .menu-row {
+    min-height: 64px;
+    padding: 12px 16px;
+    gap: 12px;
+    font-size: 15px;
+    grid-template-columns: 22px minmax(0, 1fr) 18px;
+  }
+  .app.v2 .more-group .menu-row:last-child {
+    border-bottom: 0;
+  }
+  .app.v2 .more-group .menu-row small {
+    margin-top: 4px;
+    font-size: 13px;
+  }
+  .app.v2 .more-cover {
+    color: var(--muted);
+    gap: 8px;
+  }
+
+  .app.v2 .tabs.segmented {
+    padding: 4px;
+    gap: 4px;
+    background: var(--surface-soft);
+    border: 0;
+    border-radius: var(--radius-control);
+    margin-bottom: 20px;
+  }
+  .app.v2 .tabs.segmented button {
+    flex: 1;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+  .app.v2 .tabs.segmented button.active {
+    color: var(--accent);
+    background: var(--surface);
+  }
+
+  .app.v2 dialog.form-dialog[open],
+  .app.v2 dialog.add-menu[open] {
+    position: fixed;
+    inset: auto 0 var(--sheet-bottom-inset, 0px);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    max-height: calc(
+      var(--sheet-viewport-height, 100dvh) - env(safe-area-inset-top) - 8px
+    );
+    border: 1px solid var(--border);
+    border-bottom: 0;
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    background: var(--surface);
+    overflow: hidden;
+    padding: 0;
+    animation: sheet-enter 180ms ease-out;
+  }
+  .app.v2 .sheet-handle {
+    display: block;
+    flex-shrink: 0;
+    width: 32px;
+    height: 4px;
+    margin: 10px auto 6px;
+    border-radius: 4px;
+    background: var(--border);
+  }
+  .app.v2 :is(.form-dialog, .add-menu) .dialog-top {
+    position: static;
+    flex-shrink: 0;
+    padding: 4px 16px 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .app.v2 :is(.form-dialog, .add-menu) .dialog-top h2 {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .app.v2 .sheet-form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .app.v2 .sheet-content {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    min-height: 0;
+  }
+  .app.v2 .form-dialog .form-fields {
+    padding: 16px;
+    gap: 16px;
+    grid-template-columns: 1fr;
+  }
+  .app.v2 .form-dialog .form-footer {
+    position: sticky;
+    bottom: 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    gap: 8px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .app.v2 .form-dialog .form-footer .button {
+    width: 100%;
+    order: -1;
+    min-height: 48px;
+  }
+  .app.v2 .form-dialog .form-footer small {
+    font-size: 13px;
+    text-align: center;
+    max-width: none;
+  }
+  .app.v2 .add-menu .add-options {
+    overflow-y: auto;
+    min-height: 0;
+    padding: 8px 16px 16px;
+  }
+  .app.v2 .add-menu .menu-row {
+    min-height: 56px;
+    padding: 12px 4px;
+    font-size: 15px;
+  }
+  .app.v2 .focus-back {
+    font-size: 14px;
+  }
+  @keyframes sheet-enter {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app.v2 button,
+  .app.v2 dialog.form-dialog,
+  .app.v2 dialog.add-menu {
+    animation: none !important;
+    transition: none !important;
+  }
+}

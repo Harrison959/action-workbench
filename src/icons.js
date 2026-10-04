@@ -42,6 +42,7 @@ import {
   Settings2,
   Target,
   Users,
+  Wallet,
 } from "lucide-react";
 export const Icons = {
   X,
@@ -86,4 +87,6 @@ export const Icons = {
   Settings2,
   Target,
   Users,
+  Wallet,
+  Music: Music2,
 };

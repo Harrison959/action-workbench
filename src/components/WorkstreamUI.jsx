@@ -61,10 +61,13 @@ export function WorkstreamSnapshot({ id }) {
   };
   const minutes = (v) => (v === null ? "未记录" : v + " 分钟");
   if (id === "income") {
-    const amount = (v) => (v === null ? "未记录" : money(Math.round(v * 100)));
+    const amount = (v) => (v === null ? "未记录" : money(v));
     const points = reader
       .getRangeValues("income.amount", addDays(date, -6), date)
-      .map((d) => ({ label: d.date.slice(5), value: d.value }));
+      .map((d) => ({
+        label: d.date.slice(5),
+        value: d.value === null ? null : d.value / 100,
+      }));
     return (
       <>
         <CompactStats

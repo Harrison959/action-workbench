@@ -2,12 +2,7 @@ import { projectEditor } from "../features/projects/editor";
 import { CommandTrigger } from "../features/command/CommandCenter";
 import React, { useEffect, useRef } from "react";
 import { Icon, Link, useApp, useSheetViewport } from "../ui";
-import {
-  PRIMARY_NAV,
-  navigationGroup,
-  mobileGroup,
-  pageTitle,
-} from "../navigation";
+import { PRIMARY_NAV, navigationGroup, mobileGroup } from "../navigation";
 import { today } from "../domain";
 import { taskEditor } from "../features/tasks/TaskComponents";
 import { eventEditor } from "../features/calendar/editor";

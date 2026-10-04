@@ -4,11 +4,8 @@ import {
   Icon,
   Button,
   Link,
-  PageHead,
-  Section as LegacySection,
   Empty,
   Tabs,
-  Stats as LegacyStats,
   Chart,
   RecordList,
   textField as f,
@@ -17,7 +14,6 @@ import {
   noteField as note,
 } from "../ui";
 import {
-  STREAMS,
   COURSES,
   GRADES,
   today,

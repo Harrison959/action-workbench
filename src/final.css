@@ -39,7 +39,11 @@
   min-height: 44px;
 }
 .app.v2 .today-next.action-surface {
-  background: var(--accent-strong);
+  background: linear-gradient(
+    135deg,
+    var(--accent-strong),
+    color-mix(in srgb, var(--accent-strong) 88%, var(--accent))
+  );
   color: var(--on-accent);
 }
 .app.v2
@@ -139,7 +143,11 @@ html[data-theme="dark"] .app.v2 .illustrated-header > .header-art {
   }
   .app.v2 .today-next.action-surface {
     min-height: 195px;
-    background: var(--accent-strong);
+    background: linear-gradient(
+      135deg,
+      var(--accent-strong),
+      color-mix(in srgb, var(--accent-strong) 88%, var(--accent))
+    );
     color: var(--on-accent);
     border: 1px solid transparent;
     border-radius: 18px;

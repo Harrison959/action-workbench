@@ -633,3 +633,54 @@ Android sync 只验证 Capacitor Web assets / 插件同步；未验收小米真�
 - 历史 Focus singleton 和同日身体测量时间缺失仍沿用旧模型限制，不使用视觉改版伪造统计精度。
 - 入口 JS 仍有既有 >500kB 提示，本轮未做范围外的 bundler 改造。
 - 旧页仍保留独有布局，非全站像素级同构；插画当前为静态装饰。本阶段停止于 Phase 9C，发布状态以对应 GitHub Actions 为准。
+
+## UI V3 Final · Remaining Work
+
+基线为 main `337b1909928d8ddc88d0e8e53961dbdaa617042a`。沿用 Phase 9C 的奶油白、莫兰迪紫、窗台插画和领域小面积色。按 Step 1–10 分步提交，完成后通过 `codex/ui-v3-final` 交付 main；没有新增业务模型、Tracker 历史、AI 或 Focus session。
+
+### Step 1–8：完成范围
+
+1. Tasks：高密度任务行显示 P1–P4、标题、项目／领域、分钟、日期和状态；优先级保留文字。Focus：计时器为第一层级，任务其次，原暂停／继续／结束与记录保留，360px 和短横屏可滚动。
+2. Project Detail：按标题、状态／领域、完成结果、进度、真实截止日期、下一步、任务、笔记、历史、生命周期操作组织。下一步最容易找到；编辑／暂停／完成／归档／回收站放底部；历史折叠。进度和状态算法不变。
+3. Calendar：原日期逻辑上增加上月／下月／今天、当前与选中日语义、有事件日期点，事件保留时间／真实时长／编辑。Inbox 的转任务与转日程调用原 editor，通过确定 ID 和成功回调标记转换；项目转换保持。Add 保留原五种动作，调用同一编辑器。
+4. Workstreams：公众号、销售、睡眠、专业课、英语、健身、吉他、情绪通过 WorkstreamHeader / CompactStats / RecordSection 统一视觉；新增只读摘要，业务表单和写入方式保留。英语和健身原 Tab 保留。Emotion 降低装饰，最近真实状态优先。
+5. Review / Insights：Daily 的任务／Top 3 概览与人工收尾在前；最后一项用既有 change 字段记录明天重点／调整。Weekly 原事实、项目、投入、生活、收入、提示和人工复盘口径不变，补充事实折叠。Insight 展示领域符号、事实、日期／样本、行动，规则／来源展开，仍最多五条。
+6. More / Settings：More 保留计划、记录、工具三组。Settings 按外观、云同步、提醒、备份／回收站、关于排列，连接参数折叠，原账号操作和既有高级工具放底部。未新增或调用 AI 能力。
+7. Web：Today 主栏行动／Top 3／Timeline，辅助栏真实摘要／进度／Quick Capture；Data 横向分组、日历双栏、业务页两栏。侧栏分组和顶部路径更轻，避免重复页面标题。
+8. A11y：主要按钮／任务控件 44px 点击区域、focus-visible、装饰图标隐藏于辅助读屏；原 dialog 焦点／Esc／返回／草稿保留。Tab 键与原方向键、深色暖紫、减少动画、长文本、360–1440px 验收通过。安卓返回处理未改。
+
+### CSS 与 bundle 审计
+
+`final.css` 在 fusion.css 后集中最终组件样式，没有一次性删除旧样式。局部覆盖旧任务行高度、Focus 插画固有宽度、重复 header 和 Daily 视觉／DOM 顺序；保留已依赖的 styles.css / v2.css / mobile.css / fusion.css。
+
+入口 JS 525.57kB（gzip 156.36kB），入口 CSS 101.01kB（gzip 19.82kB）。与基线相比 JS 约增加 0.72kB。sourcemap 审计显示入口主要为 React DOM 与现有 Supabase 的认证／PostgREST／Storage／Realtime SDK，不是插画内嵌或整包图标导入；lucide 保留显式命名导入，补全 Wallet 与 Music 别名，删除已不用的页面导入与 Daily 统计。Three 未出现在入口 sourcemap。57,028 bytes 的插画仍为独立 WebP。主包 >500kB 的既有提示保留，没有隐藏告警或使用 bundler hack。
+
+Projects / Data / Review / Insights / Settings / CorePages / Workstreams / NavigationPages 沿用现有按需加载。Pages 子路径资源、刷新、丢失 chunk 的恢复提示与数据保留均由生产测试覆盖。
+
+### Step 9：真实截图与回归
+
+可复现脚本 `scripts/capture-v3.mjs`：先开启 4175 端口的开发服务器，再运行 `node scripts/capture-v3.mjs`。只使用隔离浏览器和空云配置，写入合成演示数据；不读取用户浏览器。截图以真实 DOM／控件为准，没有隐藏控件或重绘。说明书图片只做 WebP 编码。
+
+手机 Pixel 7 的 24 张首屏、长截图与总览在 `.qa/v3-final/mobile-overview.png`；1440×960 的 8 张 Web 首屏、长截图与总览在 `.qa/v3-final/desktop-overview.png`。`runtime.json` 记录 32 个页面，无 pageerror、HTTP >=400 或横向溢出。说明书的 32 张实际截图放在 `docs/images/v3/`，总计约 0.93MB。
+
+截图审计修复了新收入摘要的重复“分→元”换算，原收入记录／Reader 不变，并补测试核对 Income 摘要／表单、Data 和 Today 的 ¥123.45 一致。保留原视觉断言，修复最终覆盖规则导致的渐变丢失；没有删除／放宽断言或新增 skip。
+
+最终本机验收（2026-10-05）：
+
+| 检查 | 结果 |
+| --- | --- |
+| npm test | 78 通过，0 失败 |
+| npm run test:e2e -- --workers=2 | 70 通过，16 项沿用原设备范围跳过，0 失败 |
+| npm run test:production | 11 通过，0 失败 |
+| npm run build（android:sync 内再次运行） | 通过；入口 JS 525.57kB / gzip 156.36kB，CSS 101.01kB / gzip 19.82kB |
+| npm run android:sync | 通过；四个既有 Capacitor 插件与最终 assets 同步 |
+| 真实截图 | 24 手机 + 8 桌面，无 pageerror／HTTP 错误／横向溢出 |
+| git diff --check | 通过 |
+
+### 验证边界
+
+- 自动验收覆盖 360×800、390、412、768、1024、1280、1440、1920，长标题／笔记／Insight、空数据、深色、横屏、短屏表单、模拟键盘、安全的弹层优先返回。没有小米真机输入法、安全区、系统返回手势、锁屏通知与覆盖安装证据。
+- 实际 Supabase 双端写入未在本轮执行；原 IndexedDB、cloud、同步协议、migration、Tracker／Weekly／Insight 规则与 Android 返回代码未修改，存储／同步模拟和 PostgreSQL 兼容测试通过。
+- 旧 Focus 没有可靠逐次历史，Weekly 继续显示无法精确统计。同日身体旧测量无时间，仍提示实际先后不确定。录音附件仍仅原设备保存，不包含在文字备份／云同步中。
+- Windows 本机 android:sync 验证 assets 和插件；实际 APK 编译须以最终提交的 GitHub Android 工作流为准，不能把 sync 当作 APK 编译。
+- 两份用户原有、未跟踪的中文使用说明保留，不纳入本轮提交；构建产物、QA 临时文件、环境参数不入仓库。

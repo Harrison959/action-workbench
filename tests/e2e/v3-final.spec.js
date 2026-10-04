@@ -6,6 +6,39 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
+test("V3 income snapshot uses the same cents as the original account form and Data", async ({
+  page,
+}) => {
+  await seed(page);
+  await page.evaluate(async () => {
+    const { put } = await import("/src/db.js");
+    const { today } = await import("/src/domain.js");
+    await put(
+      "account",
+      { name: "演示账号", track: "阅读", start: today() },
+      "v3-account",
+    );
+    await put(
+      "income",
+      { date: today(), cents: 12345, accountId: "v3-account", track: "阅读" },
+      "v3-income",
+    );
+  });
+  await page.goto("/#income");
+  const stats = page.locator(".workstream-page > .compact-stats");
+  await expect(stats).toContainText("今日收入");
+  await expect(stats.locator("strong")).toHaveText(["¥123.45", "¥123.45"]);
+  await expect(page.locator("#income-v3-account")).toHaveValue("123.45");
+  await page.goto("/#data");
+  await expect(
+    page.locator('[data-tracker="income.amount"] .tracker-value'),
+  ).toHaveText("已录 ¥123.45");
+  await page.goto("/#today");
+  await expect(
+    page.locator(".today-signal").filter({ hasText: "公众号收入" }),
+  ).toContainText("¥123.45");
+});
+
 async function seed(page) {
   await page.goto("/#today");
   await expect(page.locator("main h1")).toBeVisible();
@@ -245,14 +278,12 @@ test("V3 settings hierarchy, touch controls and long content survive responsive 
   }
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto("/#calendar");
-  const sizes = await page
-    .locator(".calendar-days button")
-    .evaluateAll((es) =>
-      es.map((e) => ({
-        width: e.getBoundingClientRect().width,
-        height: e.getBoundingClientRect().height,
-      })),
-    );
+  const sizes = await page.locator(".calendar-days button").evaluateAll((es) =>
+    es.map((e) => ({
+      width: e.getBoundingClientRect().width,
+      height: e.getBoundingClientRect().height,
+    })),
+  );
   for (const size of sizes) {
     expect(size.width).toBeGreaterThanOrEqual(44);
     expect(size.height).toBeGreaterThanOrEqual(44);

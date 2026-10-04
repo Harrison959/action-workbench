@@ -623,13 +623,8 @@ export function Summary() {
     setValues(r || {});
   }, [date, r?.id]);
   const tasks = a
-      .list("task")
-      .filter((t) => t.date === date && t.status !== "cancelled"),
-    rev = sum(
-      a.list("income").filter((i) => i.date === date),
-      "cents",
-    ),
-    deals = a.list("deal").filter((d) => d.date === date);
+    .list("task")
+    .filter((t) => t.date === date && t.status !== "cancelled");
   return (
     <>
       <PageHead

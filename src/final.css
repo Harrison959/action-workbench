@@ -1,4 +1,90 @@
 /* UI V3 Final: additive refinements over the verified Phase 9C foundation. */
+.app.v2 .settings-page {
+  max-width: 1100px;
+}
+.app.v2 .settings-page > .section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 0 0 18px;
+}
+.app.v2 .settings-page .section-head {
+  margin-bottom: 18px;
+}
+.app.v2 .settings-page .section-head h2 {
+  font-size: 19px;
+}
+.app.v2 .settings-page .connection-status {
+  flex-wrap: wrap;
+  padding: 0 0 16px;
+  background: transparent;
+}
+.app.v2 .settings-page .theme-options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.app.v2 .settings-page .theme-options button {
+  min-height: 48px;
+  background: var(--surface-soft);
+  color: var(--text);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 10px 16px;
+}
+.app.v2 .settings-page .theme-options .selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.app.v2 .theme-swatch.light {
+  background: #f8f6f2;
+}
+.app.v2 .theme-swatch.dark {
+  background: #2b2833;
+}
+.app.v2 :is(.settings-advanced, .connection-details) > summary {
+  min-height: 44px;
+  cursor: pointer;
+  color: var(--accent-strong);
+}
+.app.v2 .settings-page .app-version {
+  text-align: left;
+  margin: 0;
+  line-height: 1.8;
+}
+.app.v2 .settings-page :is(.text-link, .file-button) {
+  min-height: 44px;
+  padding: 10px 14px;
+  background: var(--accent-soft);
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+}
+.app.v2 .settings-page .conflict pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.app.v2 .more-group .menu-row {
+  min-height: 64px;
+}
+.app.v2 .more-group .menu-row > span {
+  font-size: 16px;
+  font-weight: 600;
+}
+.app.v2 .more-group .menu-row small {
+  font-size: 13px;
+  font-weight: 400;
+}
+@media (max-width: 760px) {
+  .app.v2 .settings-page > .section {
+    padding: 16px;
+  }
+  .app.v2 .settings-page .two-col {
+    gap: 18px;
+  }
+}
 .app.v2 .daily-reflection {
   order: -1;
 }

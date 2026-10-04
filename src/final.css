@@ -1,0 +1,92 @@
+/* UI V3 Final: additive refinements over the verified Phase 9C foundation. */
+.app.v2 .task-row {
+  position: relative;
+  min-width: 0;
+  padding-left: 9px;
+}
+.app.v2 .task-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 17px;
+  bottom: 17px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--faint);
+}
+.app.v2 .task-row[data-priority="P1"]::before {
+  background: var(--danger);
+}
+.app.v2 .task-row[data-priority="P2"]::before {
+  background: var(--warning);
+}
+.app.v2 .task-row[data-priority="P3"]::before {
+  background: var(--success);
+}
+.app.v2 .task-row .priority {
+  background: transparent;
+  padding: 0;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--muted);
+}
+.app.v2 .task-row-content {
+  min-width: 0;
+}
+.app.v2 .task-row :is(strong, .task-project) {
+  overflow-wrap: anywhere;
+}
+.app.v2 .focus-clock {
+  flex-shrink: 0;
+  max-width: 100%;
+}
+.app.v2 .focus-heading h1 {
+  font-size: 24px;
+  max-width: 640px;
+  overflow-wrap: anywhere;
+}
+.app.v2 .focus-actions .button {
+  min-height: 48px;
+}
+@media (max-width: 760px) {
+  .app.v2 .task-with-delete {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .app.v2 .task-with-delete > .task-row {
+    flex: 1;
+    min-width: 0;
+  }
+  .app.v2 .task-row {
+    gap: 4px;
+  }
+  .app.v2 .task-row .task-text > span {
+    line-height: 1.6;
+    font-size: 12px;
+  }
+  .app.v2 .task-project {
+    font-size: 13px;
+  }
+  .app.v2 .focus-page .focus-clock {
+    width: min(280px, 75vw);
+    height: min(280px, 75vw);
+    margin: 16px auto;
+  }
+  .app.v2 .focus-clock .timer {
+    font-size: clamp(48px, 15vw, 64px);
+  }
+  .app.v2 .focus-page .focus-heading h1 {
+    font-size: 22px;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .app.v2 .focus-page {
+    padding-top: 8px;
+  }
+  .app.v2 .focus-page .focus-clock {
+    width: 190px;
+    height: 190px;
+  }
+}

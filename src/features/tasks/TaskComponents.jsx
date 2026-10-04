@@ -9,7 +9,12 @@ import {
   noteField as note,
 } from "../../ui";
 import { STREAMS, today } from "../../domain.js";
-import { AREAS, PROJECT_STATUSES, projectPath } from "../projects/model.js";
+import {
+  AREAS,
+  PROJECT_STATUSES,
+  projectPath,
+  areaLabel,
+} from "../projects/model.js";
 import { openTaskFocus } from "./focus.js";
 export function taskEditor(app, row = {}) {
   const projects = app.list("project");
@@ -184,7 +189,9 @@ export function TaskRow({
                 <i className={"priority " + (task.priority || "P2")}>
                   {task.priority || "P2"}
                 </i>
-                {STREAMS.find((s) => s.id === task.stream)?.name || "个人"}
+                {task.area
+                  ? areaLabel(task.area)
+                  : STREAMS.find((s) => s.id === task.stream)?.name || "个人"}
                 <b>·</b>
               </>
             )}
@@ -193,7 +200,10 @@ export function TaskRow({
               <span className="today-inline-project"> · {project.title}</span>
             )}
             {variant === "today" && task.status === "done" && " · 已完成"}
-            {task.date && task.date !== today() && <> · {task.date}</>}
+            {task.date && (variant !== "today" || task.date !== today()) && (
+              <> · {task.date}</>
+            )}
+            {variant !== "today" && task.status === "done" && " · 已完成"}
             {task.status === "cancelled" && " · 已取消"}
           </span>
         </button>

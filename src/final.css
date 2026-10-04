@@ -1,4 +1,142 @@
 /* UI V3 Final: additive refinements over the verified Phase 9C foundation. */
+.app.v2 .workstream-page {
+  min-width: 0;
+}
+.app.v2 .domain-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  vertical-align: middle;
+  margin-right: 9px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+.app.v2 .domain-income {
+  color: var(--finance);
+  background: color-mix(in srgb, var(--finance) 14%, var(--surface));
+}
+.app.v2 :is(.domain-sleep, .domain-fitness) {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 14%, var(--surface));
+}
+.app.v2 .compact-stats .stats {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  gap: 16px;
+  padding: 18px;
+  margin: 16px 0;
+}
+.app.v2 .compact-stats .stat {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.app.v2 .compact-stats .stat strong {
+  font-size: clamp(20px, 3vw, 28px);
+  overflow-wrap: anywhere;
+}
+.app.v2 .workstream-page .record-section {
+  border: 0;
+  padding: 16px 0;
+  margin: 12px 0;
+}
+.app.v2 .workstream-page :is(.record-list, .comparison-row, .income-row) {
+  background: var(--surface);
+}
+.app.v2 .workstream-page .record-list {
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.app.v2 .workstream-page .record {
+  padding: 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  margin: 0;
+}
+.app.v2 .workstream-page .record + .record {
+  border-top: 1px solid var(--border);
+}
+.app.v2 .workstream-page .grade {
+  width: 32px;
+  height: 32px;
+  font-size: 15px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+.app.v2 .workstream-page :is(h3, p, small) {
+  overflow-wrap: anywhere;
+}
+.app.v2 .snapshot-trend {
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.app.v2 .snapshot-trend summary {
+  min-height: 44px;
+  cursor: pointer;
+}
+.app.v2 .emotion-latest {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px;
+  border-radius: 16px;
+}
+.app.v2 .emotion-latest > svg {
+  color: var(--accent);
+}
+.app.v2 .emotion-latest h2 {
+  font-size: 24px;
+  margin: 4px 0;
+}
+.app.v2 .emotion-latest p {
+  color: var(--muted);
+  font-size: 14px;
+}
+@media (max-width: 760px) {
+  .app.v2 .workstream-page .page-head {
+    margin-bottom: 14px;
+  }
+  .app.v2 .workstream-page .tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    max-width: 100%;
+  }
+  .app.v2 .workstream-page .tabs button {
+    flex-shrink: 0;
+  }
+  .app.v2 .workstream-page .income-row {
+    padding: 12px 8px;
+    gap: 8px;
+  }
+  .app.v2 .workstream-page .income-row .index {
+    display: none;
+  }
+  .app.v2 .workstream-page .income-footer {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .app.v2 .compact-stats .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .app.v2 .workstream-page .grade-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .app.v2 .workstream-page .grade-grid > div {
+    background: var(--surface-soft);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .app.v2 .workstream-page .mood-counts {
+    gap: 8px;
+  }
+}
 .app.v2 .calendar-month-navigation {
   display: flex;
   gap: 4px;

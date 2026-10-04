@@ -51,7 +51,6 @@ export function Today() {
         </time>
         <div className="today-title-line">
           <h1>今日行动</h1>
-          <TodayProgress tasks={planned} />
         </div>
       </header>
       <div className="today-workspace">
@@ -61,6 +60,7 @@ export function Today() {
           overflow={planned.filter((t) => t.top).length > 3}
         />
         <TodaySignals date={date} />
+        <TodayProgress tasks={planned} />
         <TodayTimeline items={todayTimeline(app.list("event"), date)} />
         <QuickCapture date={date} />
       </div>

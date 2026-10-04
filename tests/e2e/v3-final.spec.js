@@ -160,3 +160,35 @@ test("V3 Calendar month navigation and Inbox reuse real editors", async ({
   );
   expect(saved.projectId).toBe("v3-project");
 });
+
+test("V3 desktop layouts use lateral space at 1024 through 1920", async ({
+  page,
+}) => {
+  await seed(page);
+  for (const width of [1024, 1280, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 960 });
+    for (const route of [
+      "today",
+      "projects",
+      "data",
+      "calendar",
+      "income",
+      "sales",
+      "settings",
+    ]) {
+      await page.goto("/#" + route);
+      await expect(page.locator("main h1")).toBeVisible();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      if (route === "today") {
+        const next = await page.locator(".today-next").boundingBox();
+        const signals = await page.locator(".today-signals").boundingBox();
+        expect(signals.x).toBeGreaterThan(next.x + next.width);
+        await expect(page.locator(".today-top .task-row")).toBeInViewport();
+      }
+    }
+  }
+});

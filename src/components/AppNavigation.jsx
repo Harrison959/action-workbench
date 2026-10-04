@@ -27,22 +27,28 @@ export function AppNavigation({ page, onAdd }) {
           快速记录
         </button>
         <nav className="side-nav" aria-label="主导航">
+          <span className="nav-group-label">行动与规划</span>
           {PRIMARY_NAV.map(([id, label, icon], index) => (
-            <Link
-              key={id}
-              to={id}
-              className={`${group === id ? "active" : ""} ${index === 4 ? "nav-secondary-start" : ""}`}
-              aria-current={group === id ? "page" : undefined}
-            >
-              <Icon name={icon} />
-              {label}
-              {id === "inbox" && (
-                <small>
-                  {a.list("inbox").filter((r) => r.status === "open").length ||
-                    ""}
-                </small>
+            <React.Fragment key={id}>
+              {index === 4 && (
+                <span className="nav-group-label">记录与管理</span>
               )}
-            </Link>
+              <Link
+                key={id}
+                to={id}
+                className={`${group === id ? "active" : ""} ${index === 4 ? "nav-secondary-start" : ""}`}
+                aria-current={group === id ? "page" : undefined}
+              >
+                <Icon name={icon} />
+                {label}
+                {id === "inbox" && (
+                  <small>
+                    {a.list("inbox").filter((r) => r.status === "open")
+                      .length || ""}
+                  </small>
+                )}
+              </Link>
+            </React.Fragment>
           ))}
         </nav>
         <div className="sidebar-bottom">
@@ -53,9 +59,7 @@ export function AppNavigation({ page, onAdd }) {
         </div>
       </aside>
       <header className="topbar">
-        <span className="topbar-path">
-          小松工作台 <i>/</i> {pageTitle(page)}
-        </span>
+        <span className="topbar-path">个人工作台</span>
         <Link className="mobile-brand" to="today">
           <img src="./logo.jpg" alt="松鹤" />
           小松

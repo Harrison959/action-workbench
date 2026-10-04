@@ -150,9 +150,14 @@ test("mobile dark palette and reduced motion remain usable", async ({
     return {
       bg: style.getPropertyValue("--app-bg").trim(),
       text: style.getPropertyValue("--text").trim(),
+      background: style.backgroundColor,
     };
   });
-  expect(colors).toEqual({ bg: "#181f1b", text: "#e7eee8" });
+  expect(colors).toEqual({
+    bg: "#171c22",
+    text: "#e7edf3",
+    background: "rgb(23, 28, 34)",
+  });
   await nav(page).getByRole("button", { name: "添加", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   expect(
@@ -213,12 +218,20 @@ test("More has three groups, readable tokens and touch targets at 360px", async 
     bg: getComputedStyle(document.documentElement)
       .getPropertyValue("--app-bg")
       .trim(),
+    background: getComputedStyle(document.documentElement).backgroundColor,
   }));
-  expect(typography).toEqual({ size: "26px", bg: "#f3f4ef" });
+  expect(typography).toEqual({
+    size: "26px",
+    bg: "#f3f4f2",
+    background: "rgb(243, 244, 242)",
+  });
   const add = await page.locator(".add-primary-icon").boundingBox();
   expect(add.width).toBe(52);
   expect(add.height).toBe(52);
   const bar = await nav(page).boundingBox();
+  expect(bar.x).toBe(12);
+  expect(bar.width).toBe(336);
+  expect(740 - (bar.y + bar.height)).toBe(12);
   expect(bar.y - add.y).toBeGreaterThanOrEqual(6);
   expect(bar.y - add.y).toBeLessThanOrEqual(8);
   await noOverflow(page);

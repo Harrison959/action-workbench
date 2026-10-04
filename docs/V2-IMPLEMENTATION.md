@@ -1,6 +1,6 @@
 # V2 架构分析与实施记录
 
-对应需求：根目录 `V2_REDESIGN.md`（用户提供的完整原文）。以下保留各阶段的分析和实施历史。Phase 1–8 已完成；最新工作为 Phase 9A：Mobile UI V3 Foundation，停止于 Phase 9A。
+对应需求：根目录 `V2_REDESIGN.md`（用户提供的完整原文）。以下保留各阶段的分析和实施历史。Phase 1–8 与 Phase 9A 已完成；最新工作为手机 Visual Direction Refresh，仅调整视觉表面，不进入 Calendar 或其他后续功能。
 
 ## 现状与复用
 
@@ -469,3 +469,47 @@ FormDialog 和 AddMenu 共用视觉 handle（不可拖拽）。FormDialog 仅增
 Android 返回测试执行的是与 App listener 相同的 handler，根层 minimize 使用替身；键盘测试缩小视口并模拟 visualViewport.height，不能代替小米真机 IME、系统侧滑、通知点击、安全区、覆盖安装验收。本机命令环境未发现 java/adb，未运行 assembleDebug，也未生成本阶段 APK；cap sync 不能当作原生构建成功。真实 Supabase 双端同步仍未进行，本阶段保留既有离线/CAS/SQL 回归。
 
 Calendar 布局、日期选择与更完整的手机日历体验留给 Phase 9B；未全量替换业务 select，handle 不支持拖拽，未新增手势。Web 首次离线访问和旧 SVG 图表比例限制沿用 Phase 8 边界。本阶段以上为本地验收结果；远端 CI 与发布状态以对应提交的 GitHub Actions 运行为准。停止于 Phase 9A。
+
+## Visual Direction Refresh：手机 Layered Surface System
+
+基于 main 99a2ed8，只调整手机视觉层（760px 及以下）。复用现有 Today sections、More grouped panels、Data metric list、Projects list，以及 FormDialog / AddMenu。没有新增 JSX 包装、业务逻辑、record kind、数据库 migration、依赖或同步规则；Calendar 保留现有布局，接受共享颜色及控件样式。
+
+### 颜色与表面层级
+
+| Token | 浅色主题 | 用途 |
+| --- | --- | --- |
+| app-bg | #F3F4F2 | 连续页面底色 |
+| surface | #FBFBF9 | 分组列表、表单内容 |
+| surface-raised | #FFFFFF | Next Action、弹窗顶部 |
+| surface-soft | #ECEFF1 | 次级按钮、筛选轨道、表单 footer |
+| accent | #3C4A59 | 主按钮、添加、选中项文字 |
+| accent-soft | #E6EBF0 | 底栏 active 轻背景 |
+| text / muted | #1F252B / #6B737C | 正文与说明 |
+| border | #D8DDE3 | 组边界、列表分隔线 |
+
+旧 bg / panel / card / wash / green / line 别名继续绑定新 token；green 是兼容变量名，手机实际为石墨蓝灰。root 的实际 background / color 同步绑定，避免仅更新 token 而仍显示旧硬编码底色。保留暗色模式，底色 / surface / raised 分别为 #171C22 / #20272E / #29323B，accent 为 #B6C6D8。
+
+普通列表组只使用细边界和 inset 顶部亮边，无外部 elevation；独立记录行透明、无圆角或阴影。raised surface 使用低强度双层阴影：1px/2px 的接触阴影和 8px/24px 的柔和阴影。没有渐变或大面积玻璃背景，手机 Sheet 的 backdrop 不再 blur。
+
+### 六处界面调整
+
+- Bottom Navigation：左右及下沿留出 12px，形成轻微浮起的底部面板，安全区只在下沿偏移计算；中间 Add 保持 52×52、向上突出约 7px，使用更高一层的微阴影。普通项以深文字和浅背景标记 active，保持原触摸区域及历史行为。Toast 上移到导航之外，主内容仍预留底部空间。
+- More：保留计划 / 记录 / 工具三组。每组共用一个 surface，组内直线分隔，行内不再建立独立表面；悬停与键盘选中使用低对比底色。
+- Today：仅“现在做什么”使用 raised panel。Top 3、时间线和进度保持连续 section / list，使用分隔线；当前行动标题保留较高辨识度。
+- Data：所有默认指标共用一个 inset group，保留值、+记录与展开历史；每个指标行不单独卡片化，其他身体测量的折叠容器透明，不嵌套外层面板。
+- Projects：多个项目合并在同一 surface，项目为厚实 panel row，内部保留结果、下一步和进度。使用组内分隔线；键盘 focus outline 向内偏移，避免被组边界裁切。
+- Bottom Sheet / Dialog：raised 顶部和 handle、近白滚动内容、浅灰 footer 建立三个层级；柔和上沿阴影。复用原草稿、保存锁、内容滚动、焦点恢复与 visualViewport 适配。
+
+### 文件与验收
+
+修改 src/mobile.css、tests/e2e/mobile-v3.spec.js、docs/V2-IMPLEMENTATION.md。手机测试更新新颜色，并验证实际 root background（不仅变量）与浮起底栏的 viewport 间距。原使用说明文件保持不动。
+
+- npm test：78 项通过。
+- npm run test:e2e：56 项通过，14 项按设备范围跳过，无失败。
+- npm run test:production：10 项通过，验证 /action-workbench/ 懒加载、刷新与原录入流程。
+- npm run build：通过；入口 JS 516.86kB / gzip 153.09kB，既有 >500kB 提示保持，未做本轮范围外的 bundle 改造。
+- npm run android:sync：通过，最终 Web assets 与四个既有插件同步成功。
+- 手机专项：10 项路径/窄屏/短屏检查通过；最后底色与提示条间距收尾后，补充执行六项 mobile-v3 回归。
+- 使用隔离测试数据查看 Pixel 7 的 More、Today、Data、两个项目列表、身体测量 Sheet，以及 360px More、暗色 Add、短屏键盘契约截图；目标页面无横向溢出、无 pageerror。旧字段、导入导出与读取逻辑继续由现有回归覆盖。
+
+以上为本地验收；尚未验证小米真机键盘、系统安全区与覆盖安装，cap sync 不等于 APK 原生构建或真机验收。未执行真实 Supabase 双端同步。远端 CI 与发布状态以本轮提交的 GitHub Actions 运行为准。停止于视觉调整，不进入 Calendar 重构。

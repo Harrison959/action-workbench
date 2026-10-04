@@ -7,14 +7,24 @@
 
 @media (max-width: 760px) {
   :root {
-    --app-bg: #f3f4ef;
-    --surface: #fcfcf9;
-    --surface-soft: #e9ede7;
-    --accent: #355747;
-    --accent-soft: #e2eae4;
-    --text: #202722;
-    --muted: #667168;
-    --border: #d8ddd5;
+    --app-bg: #f3f4f2;
+    --surface: #fbfbf9;
+    --surface-raised: #ffffff;
+    --surface-soft: #eceff1;
+    --accent: #3c4a59;
+    --accent-hover: #303c49;
+    --accent-soft: #e6ebf0;
+    --text: #1f252b;
+    --muted: #6b737c;
+    --border: #d8dde3;
+    --surface-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    --shadow-raised:
+      0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+    --shadow-action:
+      0 2px 4px rgba(16, 24, 40, 0.06), 0 6px 14px rgba(16, 24, 40, 0.1);
+    --shadow-sheet:
+      0 -1px 2px rgba(16, 24, 40, 0.04), 0 -8px 24px rgba(16, 24, 40, 0.08);
+    --focus-ring: rgba(60, 74, 89, 0.15);
     --warning: #946247;
     --on-accent: #fff;
     --bg: var(--app-bg);
@@ -36,22 +46,37 @@
     --space-8: 32px;
   }
   :root[data-theme="dark"] {
-    --app-bg: #181f1b;
-    --surface: #222b25;
-    --surface-soft: #2b352e;
-    --accent: #a5c6b1;
-    --accent-soft: #344b3c;
-    --text: #e7eee8;
-    --muted: #b0beb3;
-    --border: #405045;
+    --app-bg: #171c22;
+    --surface: #20272e;
+    --surface-raised: #29323b;
+    --surface-soft: #1c232b;
+    --accent: #b6c6d8;
+    --accent-hover: #c6d3e1;
+    --accent-soft: #2c3948;
+    --text: #e7edf3;
+    --muted: #a4afbd;
+    --border: #37414d;
+    --surface-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+    --shadow-raised:
+      0 1px 2px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.16);
+    --shadow-action:
+      0 2px 4px rgba(0, 0, 0, 0.12), 0 6px 14px rgba(0, 0, 0, 0.2);
+    --shadow-sheet:
+      0 -1px 2px rgba(0, 0, 0, 0.12), 0 -8px 24px rgba(0, 0, 0, 0.18);
+    --focus-ring: rgba(182, 198, 216, 0.2);
     --warning: #d0aa8b;
-    --on-accent: #17291d;
+    --on-accent: #17212d;
     --bg: var(--app-bg);
     --panel: var(--surface);
     --card: var(--surface);
     --wash: var(--surface-soft);
     --green: var(--accent);
     --line: var(--border);
+  }
+  :root,
+  :root[data-theme="dark"] {
+    color: var(--text);
+    background: var(--app-bg);
   }
   body {
     font-size: 15px;
@@ -168,6 +193,24 @@
     font-size: 14px;
   }
   .app.v2 .button:not(.secondary) {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+  .app.v2 .button:not(.secondary):hover {
+    background: var(--accent-hover);
+  }
+  .app.v2 .button.secondary {
+    background: var(--surface-soft);
+    border-color: var(--border);
+    color: var(--text);
+  }
+  .app.v2 .check {
+    border-color: var(--border);
+  }
+  .app.v2 .check.done {
+    background: var(--accent);
+    border-color: var(--accent);
     color: var(--on-accent);
   }
   .app.v2 input:not([type="checkbox"]):not([type="radio"]),
@@ -178,6 +221,12 @@
     min-height: 48px;
     background: var(--surface);
     color: var(--text);
+    box-shadow: var(--surface-highlight);
+  }
+  .app.v2 :is(input, select, textarea):focus-visible {
+    border-color: var(--accent);
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 1px;
   }
   .app.v2 :is(.plan-task, .focus-subtasks label, .weekly-priorities label) {
     min-height: 44px;
@@ -192,12 +241,16 @@
   }
 
   .app.v2 .bottom-nav {
-    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    padding: 8px 12px;
     min-height: 80px;
     gap: 4px;
     background: var(--surface);
-    border-top: 1px solid var(--border);
-    box-shadow: none;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--surface-highlight), var(--shadow-raised);
     align-items: center;
   }
   .app.v2 .bottom-nav > :is(a, button) {
@@ -234,6 +287,7 @@
     border-radius: 16px;
     background: var(--accent);
     color: var(--on-accent);
+    box-shadow: var(--surface-highlight), var(--shadow-action);
   }
   .app.v2 .bottom-nav > button {
     position: relative;
@@ -243,6 +297,9 @@
   }
   .app.v2 .bottom-nav > button > span:last-child {
     margin-top: 38px;
+  }
+  .app.v2 .toast {
+    bottom: calc(112px + env(safe-area-inset-bottom));
   }
 
   .app.v2 .desktop-more {
@@ -262,6 +319,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-group);
     overflow: hidden;
+    box-shadow: var(--surface-highlight);
   }
   .app.v2 main .menu-row {
     display: grid;
@@ -279,6 +337,12 @@
   .app.v2 .more-group .menu-row:last-child {
     border-bottom: 0;
   }
+  .app.v2 .more-group .menu-row {
+    background: transparent;
+  }
+  .app.v2 .more-group .menu-row:is(:hover, :focus-visible) {
+    background: var(--surface-soft);
+  }
   .app.v2 .more-group .menu-row small {
     margin-top: 4px;
     font-size: 13px;
@@ -286,6 +350,112 @@
   .app.v2 .more-cover {
     color: var(--muted);
     gap: 8px;
+  }
+
+  /* Continuous sections; only the immediate action is elevated. */
+  .app.v2 .today-next {
+    padding: 20px;
+    margin-bottom: 24px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-raised);
+  }
+  .app.v2 .today-next h2 {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .app.v2 .today-action-title {
+    font-size: 23px;
+    line-height: 1.4;
+  }
+  .app.v2 .today-section {
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 16px 0;
+  }
+  .app.v2 .today-top .task-row,
+  .app.v2 .today-timeline li {
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .app.v2 .today-progress {
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* A single inset group per list. Individual records have no elevation. */
+  .app.v2 .tracker-list,
+  .app.v2 .project-list {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-group);
+    box-shadow: var(--surface-highlight);
+  }
+  .app.v2 .tracker-list {
+    padding: 0 16px;
+  }
+  .app.v2 .tracker-row {
+    margin: 0;
+    padding: 12px 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .app.v2 .tracker-row:last-child {
+    border-bottom: 0;
+  }
+  .app.v2 .tracker-details {
+    margin-top: 0;
+    color: var(--muted);
+  }
+  .app.v2 .tracker-context,
+  .app.v2 .tracker-details p {
+    opacity: 1;
+    color: var(--muted);
+  }
+  .app.v2 .tracker-history {
+    border-top: 1px solid var(--border);
+  }
+  .app.v2 .tracker-body {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+  .app.v2 .tracker-body > summary {
+    margin-bottom: 8px;
+    color: var(--muted);
+  }
+  .app.v2 .project-list {
+    overflow: hidden;
+  }
+  .app.v2 main .project-list-row {
+    margin: 0;
+    padding: 20px 16px;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    gap: 12px;
+  }
+  .app.v2 .project-list-row:last-child {
+    border-bottom: 0;
+  }
+  .app.v2 .project-list-row:is(:hover, :focus-visible) {
+    background: var(--surface-soft);
+  }
+  .app.v2 .project-list-row:focus-visible {
+    outline-offset: -3px;
+  }
+  .app.v2 .project-row-title h2 {
+    font-size: 18px;
+  }
+  .app.v2 .project-list-row:hover .project-row-title h2 {
+    text-decoration: none;
+  }
+  .app.v2 .project-progress {
+    margin-top: 12px;
   }
 
   .app.v2 .tabs.segmented {
@@ -306,7 +476,7 @@
   }
   .app.v2 .tabs.segmented button.active {
     color: var(--accent);
-    background: var(--surface);
+    background: var(--surface-raised);
   }
 
   .app.v2 dialog.form-dialog[open],
@@ -324,10 +494,15 @@
     border: 1px solid var(--border);
     border-bottom: 0;
     border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
-    background: var(--surface);
+    background: var(--surface-raised);
     overflow: hidden;
     padding: 0;
     animation: sheet-enter 180ms ease-out;
+    box-shadow: var(--surface-highlight), var(--shadow-sheet);
+  }
+  .app.v2 dialog:is(.form-dialog, .add-menu)::backdrop {
+    background: rgba(16, 24, 40, 0.32);
+    backdrop-filter: none;
   }
   .app.v2 .sheet-handle {
     display: block;
@@ -336,13 +511,14 @@
     height: 4px;
     margin: 10px auto 6px;
     border-radius: 4px;
-    background: var(--border);
+    background: var(--muted);
+    opacity: 0.45;
   }
   .app.v2 :is(.form-dialog, .add-menu) .dialog-top {
     position: static;
     flex-shrink: 0;
     padding: 4px 16px 12px;
-    background: var(--surface);
+    background: var(--surface-raised);
     border-bottom: 1px solid var(--border);
   }
   .app.v2 :is(.form-dialog, .add-menu) .dialog-top h2 {
@@ -359,6 +535,7 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     min-height: 0;
+    background: var(--surface);
   }
   .app.v2 .form-dialog .form-fields {
     padding: 16px;
@@ -374,7 +551,8 @@
     padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
     gap: 8px;
     border-top: 1px solid var(--border);
-    background: var(--surface);
+    background: var(--surface-soft);
+    box-shadow: var(--surface-highlight);
   }
   .app.v2 .form-dialog .form-footer .button {
     width: 100%;
@@ -390,11 +568,13 @@
     overflow-y: auto;
     min-height: 0;
     padding: 8px 16px 16px;
+    background: var(--surface);
   }
   .app.v2 .add-menu .menu-row {
     min-height: 56px;
     padding: 12px 4px;
     font-size: 15px;
+    background: transparent;
   }
   .app.v2 .focus-back {
     font-size: 14px;

@@ -169,13 +169,16 @@ export function WeeklySections({ summary: s }) {
           金额来自已登记样本，不表示已全部填齐。
         </p>
       </Block>
-      <Block title="事实记录">
-        <ul className="weekly-facts">
-          {s.facts.map((f) => (
-            <li key={f}>{f}</li>
-          ))}
-        </ul>
-      </Block>
+      <details className="weekly-facts-disclosure">
+        <summary>更多事实汇总</summary>
+        <Block title="事实记录">
+          <ul className="weekly-facts">
+            {s.facts.map((f) => (
+              <li key={f}>{f}</li>
+            ))}
+          </ul>
+        </Block>
+      </details>
     </>
   );
 }

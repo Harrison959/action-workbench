@@ -34,12 +34,30 @@ export function InsightList({ items }) {
           <span className="insight-symbol" aria-hidden="true">
             <Icon
               name={
-                item.severity === "attention" ? "Target" : "ChartNoAxesCombined"
+                item.actionRoute.startsWith("projects")
+                  ? "FolderKanban"
+                  : item.actionRoute === "sleep"
+                    ? "Moon"
+                    : item.actionRoute === "income"
+                      ? "Wallet"
+                      : item.actionRoute === "fitness"
+                        ? "Dumbbell"
+                        : item.actionRoute.startsWith("review")
+                          ? "NotebookPen"
+                          : "ChartNoAxesCombined"
               }
             />
           </span>
           <h3>{item.title}</h3>
           <p>{item.description}</p>
+          {item.evidence.window?.start && (
+            <p className="insight-sample">
+              {item.evidence.window.start} — {item.evidence.window.end}
+              {item.evidence.recordedDays !== undefined
+                ? " · 有效记录 " + item.evidence.recordedDays + " 天"
+                : ""}
+            </p>
+          )}
           <Link className="text-link" to={item.actionRoute}>
             {item.actionLabel} →
           </Link>

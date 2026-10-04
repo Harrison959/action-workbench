@@ -1,4 +1,83 @@
 /* UI V3 Final: additive refinements over the verified Phase 9C foundation. */
+.app.v2 .daily-reflection {
+  order: -1;
+}
+.app.v2 .daily-footprints {
+  color: var(--muted);
+}
+.app.v2 .daily-reflection .field > span {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.app.v2 .daily-reflection textarea {
+  min-height: 86px;
+}
+.app.v2 .weekly-review .weekly-section {
+  border: 0;
+  padding: 18px 0;
+  margin: 0 0 14px;
+}
+.app.v2 .weekly-review .weekly-section > h2 {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+.app.v2 .weekly-review .weekly-section > dl {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 10px 16px;
+}
+.app.v2 .weekly-review .weekly-line {
+  padding: 9px 0;
+  gap: 12px;
+}
+.app.v2 .weekly-review .weekly-line dt {
+  color: var(--muted);
+}
+.app.v2 .weekly-review .weekly-line dd {
+  font-size: 15px;
+  font-weight: 550;
+}
+.app.v2 .weekly-priorities label {
+  min-height: 48px;
+}
+.app.v2 .weekly-facts-disclosure summary {
+  min-height: 44px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.app.v2 .insight-list .insight-sample {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 8px;
+}
+.app.v2 .insight-list > li {
+  overflow-wrap: anywhere;
+}
+@media (min-width: 761px) {
+  .app.v2 .insight-symbol {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    background: var(--accent-soft);
+    border-radius: 12px;
+    color: var(--accent-strong);
+    margin-bottom: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .app.v2 .daily-reflection {
+    order: -1;
+  }
+  .app.v2 .weekly-review .weekly-line {
+    grid-template-columns: minmax(90px, 0.7fr) minmax(0, 1fr);
+  }
+  .app.v2 .weekly-review .weekly-line dd {
+    overflow-wrap: anywhere;
+  }
+}
 .app.v2 .workstream-page {
   min-width: 0;
 }

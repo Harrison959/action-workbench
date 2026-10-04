@@ -656,16 +656,15 @@ export function Summary() {
               : "未安排任务",
           ],
           [
-            "公众号收入",
-            a.list("income").some((i) => i.date === date)
-              ? money(rev)
-              : "未记录",
+            "Top 3 完成",
+            tasks.filter((t) => t.top).length
+              ? `${tasks.filter((t) => t.top && t.status === "done").length} / ${tasks.filter((t) => t.top).length}`
+              : "未安排重点",
           ],
-          ["销售收入", deals.length ? money(sum(deals, "cents")) : "未记录"],
         ]}
       />
       <div className="two-col">
-        <Section title="今天留下的足迹">
+        <Section title="今天留下的足迹" className="daily-footprints">
           {tasks.length ? (
             tasks.map((t) => <TaskRow key={t.id} task={t} compact />)
           ) : (
@@ -691,7 +690,7 @@ export function Summary() {
             ) : null;
           })}
         </Section>
-        <Section title="留给明天的自己">
+        <Section title="留给明天的自己" className="daily-reflection">
           <form
             onSubmit={async (e) => {
               e.preventDefault();
@@ -719,6 +718,7 @@ export function Summary() {
                   }
                   value={values[key] || ""}
                   rows="3"
+                  placeholder={key === "change" ? "写下明天最重要的事，以及想做的一点调整" : undefined}
                   onChange={(e) =>
                     setValues({ ...values, [key]: e.target.value })
                   }

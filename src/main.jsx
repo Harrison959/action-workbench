@@ -17,6 +17,7 @@ import {
 import "./styles.css";
 import "./v2.css";
 import "./mobile.css";
+import "./fusion.css";
 const pageMap = {
   today: Today,
   projects: lazy(() =>

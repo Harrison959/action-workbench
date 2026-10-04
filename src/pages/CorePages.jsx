@@ -22,6 +22,9 @@ import { taskEditor, TaskRow } from "../features/tasks/TaskComponents";
 export { taskEditor, TaskRow } from "../features/tasks/TaskComponents";
 import { projectEditor } from "../features/projects/editor";
 import { projectPath } from "../features/projects/model";
+import { HeaderArt } from "../components/HeaderArt";
+import { QuickCapture } from "../features/today/QuickCapture";
+import { CalendarMonth } from "../features/calendar/CalendarMonth";
 export function Tasks() {
   const a = useApp(),
     [tab, setTab] = useState("today"),
@@ -145,17 +148,46 @@ export function Focus() {
         返回工作台
       </Link>
 
-      <h1>{task?.title || "选一件事，全心投入。"}</h1>
+      <HeaderArt />
+      <div className="focus-heading">
+        <span>专注</span>
+        <h1>{task?.title || "选择一个任务"}</h1>
+      </div>
       {task ? (
         <>
           <p className="muted">{task.note || "按预估时长计时，可随时暂停。"}</p>
-          <div
-            className={"timer " + (foc?.running ? "running" : "")}
-            aria-live="off"
-          >
-            {String(Math.floor(remaining / 60)).padStart(2, "0")}
-            <span>:</span>
-            {String(remaining % 60).padStart(2, "0")}
+          <div className="focus-clock">
+            <svg
+              className="focus-ring"
+              viewBox="0 0 240 240"
+              aria-hidden="true"
+            >
+              <circle cx="120" cy="120" r="108" className="ring-track" />
+              <circle
+                cx="120"
+                cy="120"
+                r="108"
+                className="ring-value"
+                pathLength="100"
+                strokeDasharray={`${Math.min(100, Math.max(0, (remaining / ((foc?.minutes || 25) * 60)) * 100))} 100`}
+              />
+            </svg>
+            <div
+              className={"timer " + (foc?.running ? "running" : "")}
+              aria-live="off"
+            >
+              {String(Math.floor(remaining / 60)).padStart(2, "0")}
+              <span>:</span>
+              {String(remaining % 60).padStart(2, "0")}
+            </div>
+          </div>
+          <div className="focus-session-meta">
+            <span>
+              本段计划 <strong>{foc?.minutes || 25} 分钟</strong>
+            </span>
+            <span>
+              本段已用 <strong>{Math.floor(elapsed / 60000)} 分钟</strong>
+            </span>
           </div>
           <p>
             {remaining === 0
@@ -271,7 +303,7 @@ export function Focus() {
         </div>
       )}
       <span className="focus-footer">
-        小松工作台 · 不求做得多，先把这一件做好。
+        结束后可记录实际结果，确认是否完成任务。
       </span>
     </div>
   );
@@ -426,7 +458,7 @@ export function Inbox() {
     });
   };
   return (
-    <>
+    <div className="inbox-page">
       <PageHead
         title="收件箱"
         description="快速记录后，可转为任务、项目或日程。"
@@ -436,6 +468,11 @@ export function Inbox() {
           </Button>
         }
       />
+      <QuickCapture date={today()} />
+      <div className="inbox-list-heading">
+        <h2>待整理</h2>
+        <span>{items.length} 条</span>
+      </div>
       <RecordList
         rows={items}
         empty="点击上方「快速记录」留下想法，再整理为任务或项目。"
@@ -493,7 +530,7 @@ export function Inbox() {
             </div>
           ))}
       </details>
-    </>
+    </div>
   );
 }
 export function Schedule() {
@@ -517,7 +554,7 @@ export function Schedule() {
     )
     .sort((x, y) => x.start.localeCompare(y.start));
   return (
-    <>
+    <div className="calendar-page">
       <PageHead
         title="日程"
         description="约定的时间固定，其他任务留有余地。"
@@ -537,6 +574,18 @@ export function Schedule() {
           }}
         />
         <Tabs items={["日", "周", "月"]} value={view} onChange={setView} />
+      </div>
+      <CalendarMonth
+        date={date}
+        onSelect={(value) => {
+          setDate(value);
+          setView("日");
+        }}
+        events={a.list("event")}
+      />
+      <div className="calendar-list-heading">
+        <h2>{view === "日" ? "当天安排" : view + "安排"}</h2>
+        <span>{entries.length} 项</span>
       </div>
       <RecordList
         rows={entries}
@@ -560,7 +609,7 @@ export function Schedule() {
           </div>
         )}
       />
-    </>
+    </div>
   );
 }
 export function Summary() {

@@ -10,6 +10,8 @@ import {
   TodayProgress,
 } from "./TodaySections";
 import { QuickCapture } from "./QuickCapture";
+import { HeaderArt } from "../../components/HeaderArt";
+import { TodaySignals } from "./TodaySignals";
 import "./today.css";
 export function Today() {
   const app = useApp(),
@@ -33,7 +35,8 @@ export function Today() {
   });
   return (
     <div className="today-page">
-      <header className="today-head">
+      <header className="today-head illustrated-header">
+        <HeaderArt />
         <time dateTime={date} className="today-date">
           {new Intl.DateTimeFormat("zh-CN", {
             timeZone: "Asia/Shanghai",
@@ -57,6 +60,7 @@ export function Today() {
           tasks={todayTopThree(tasks, date)}
           overflow={planned.filter((t) => t.top).length > 3}
         />
+        <TodaySignals date={date} />
         <TodayTimeline items={todayTimeline(app.list("event"), date)} />
         <QuickCapture date={date} />
       </div>

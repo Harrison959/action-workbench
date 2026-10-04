@@ -35,7 +35,7 @@ test("Data reads old records without writes; source routes, range, backup, refre
     return db.exportData();
   });
   for (const [id, value] of [
-    ["sleep.duration", "402 分钟"],
+    ["sleep.duration", "6小时42分"],
     ["body.weight", "57.3 kg"],
     ["workout.minutes", "45 分钟"],
     ["study.minutes", "120 分钟"],

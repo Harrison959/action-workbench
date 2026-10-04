@@ -154,9 +154,9 @@ test("mobile dark palette and reduced motion remain usable", async ({
     };
   });
   expect(colors).toEqual({
-    bg: "#171c22",
-    text: "#e7edf3",
-    background: "rgb(23, 28, 34)",
+    bg: "#211f28",
+    text: "#f1edf6",
+    background: "rgb(33, 31, 40)",
   });
   await nav(page).getByRole("button", { name: "添加", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
@@ -221,9 +221,9 @@ test("More has three groups, readable tokens and touch targets at 360px", async 
     background: getComputedStyle(document.documentElement).backgroundColor,
   }));
   expect(typography).toEqual({
-    size: "29px",
-    bg: "#f1f2f0",
-    background: "rgb(241, 242, 240)",
+    size: "28px",
+    bg: "#f8f6f2",
+    background: "rgb(248, 246, 242)",
   });
   const add = await page.locator(".add-primary-icon").boundingBox();
   expect(add.width).toBe(48);

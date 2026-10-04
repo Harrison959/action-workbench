@@ -4,6 +4,7 @@ import { today, addDays } from "../../domain";
 import { TRACKERS } from "./definitions";
 import { createTrackerReader } from "./selectors";
 import { formatMetric } from "./metrics";
+import { displayMetric } from "./display";
 import { recordMetric } from "./recording";
 import "./trackers.css";
 
@@ -21,6 +22,16 @@ const LABELS = {
   "english.minutes": "英语",
   "guitar.minutes": "吉他",
 };
+const METRIC_ICONS = {
+  "sleep.duration": "Moon",
+  "body.weight": "Heart",
+  "workout.minutes": "Dumbbell",
+  "study.minutes": "GraduationCap",
+  "english.minutes": "BookOpen",
+  "guitar.minutes": "Music2",
+  "emotion.intensity": "Feather",
+  "income.amount": "Newspaper",
+};
 
 function MetricRow({ definition: def, reader, date, days, onRecord }) {
   const value = reader.getDailyValue(def.id, date);
@@ -34,6 +45,9 @@ function MetricRow({ definition: def, reader, date, days, onRecord }) {
           className="tracker-open"
           aria-label={"打开" + def.name + "原始记录"}
         >
+          <span className="metric-icon" aria-hidden="true">
+            <Icon name={METRIC_ICONS[def.id] || "Heart"} />
+          </span>
           <span className="tracker-name">
             {LABELS[def.id] || def.name}
             {value.selected?.label && (
@@ -42,7 +56,7 @@ function MetricRow({ definition: def, reader, date, days, onRecord }) {
           </span>
           <strong className="tracker-value">
             {def.type === "money" && !value.missing ? "已录 " : ""}
-            {value.missing ? "—" : formatMetric(def, value.value)}
+            {value.missing ? "—" : displayMetric(def, value.value)}
           </strong>
         </Link>
         <button
@@ -140,6 +154,7 @@ export function Data() {
   return (
     <div className="tracker-data">
       <PageHead
+        illustrated
         title="数据"
         description="点击记录补记，点击指标名查看原始详情。未记录不按零计算。"
       />

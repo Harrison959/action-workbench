@@ -100,6 +100,7 @@ function ProjectList() {
   return (
     <>
       <PageHead
+        illustrated
         title="项目"
         description="围绕明确的结果，持续推进下一步。"
         action={

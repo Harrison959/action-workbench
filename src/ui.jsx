@@ -8,6 +8,7 @@ import React, {
 import { Icons } from "./icons";
 import { parentRoute } from "./navigation";
 import { navigate, backToParent } from "./navigationHistory";
+import { HeaderArt } from "./components/HeaderArt";
 export const Context = createContext(null);
 export const useApp = () => useContext(Context);
 export function Icon({ name = "ArrowUpRight", size = 19, ...props }) {
@@ -65,11 +66,23 @@ export function Link({
     </a>
   );
 }
-export function PageHead({ eyebrow, title, description, action }) {
+export function PageHead({
+  eyebrow,
+  title,
+  description,
+  action,
+  illustrated = false,
+}) {
   const app = useApp();
   const parent = app?.route && parentRoute(app.route);
   return (
-    <header className="page-head mobile-page-header">
+    <header
+      className={
+        "page-head mobile-page-header" +
+        (illustrated ? " illustrated-header" : "")
+      }
+    >
+      {illustrated && <HeaderArt />}
       {parent && (
         <div className="mobile-page-back">
           <button

@@ -142,6 +142,7 @@ export function TaskRow({
     <div
       className={"task-row " + (task.status === "done" ? "done" : "")}
       data-task-id={task.id}
+      data-priority={task.priority || "P2"}
     >
       <button
         className="check"

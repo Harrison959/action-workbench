@@ -561,3 +561,75 @@ Calendar 布局、日期选择与更完整的手机日历体验留给 Phase 9B�
 身体旧记录没有测量时间，同日多条继续按 Reader 原有稳定 ID 顺序选择并提示无法确认先后；此次不将保存时间伪装为测量时间。新验收确认两个真实 body record 均保留，而非断言最后保存的值必然作为当日显示值。
 
 Android sync 只验证 Capacitor Web assets / 插件同步；未验收小米真机 IME、系统安全区、通知点击、APK 编译或覆盖安装。未验证真实 Supabase 双端环境；本阶段未改其代码与 schema。主入口 bundle 既有 >500kB 提示保留，本轮未做范围外构建拆分。当前改动为本地工作区结果，不声明 GitHub 已发布。停止于 Phase 9B。
+
+
+## Phase 9C：Color + Layout Fusion
+
+基于 main 5f354ad。按用户确认的图稿，把奶油白、莫兰迪紫、窗边插画与现有可用页面结构融合。重点是手机呈现；桌面共享新 token 和控件颜色，保留既有页面及导航。未修改 record kind、IndexedDB、Supabase schema、同步、Tracker Adapter / aggregation、Weekly Review / Insight 规则、Android 返回处理。
+
+### 设计融合与页面
+
+第一套参考提供暖白、柔和紫、阳光 / 绿植 / 猫咪插画；第二套参考提供完整页面关系、具体任务与数值、可点击操作和列表分组。没有使用图稿里的虚构效率百分比、饮水指标、Focus 历史统计或未来收入预测。
+
+- Today：独立插画 header、日期与任务完成进度；紫色 Next Action 显示真实推荐、项目、优先级、预计分钟和原 Focus 按钮。Top 3 保留三槽位、完成和详情 / 专注操作，新增 P1–P4 细色条。公众号收入与睡眠两块轻量摘要只读原 Tracker Reader，缺失显示未记录。时间线与 Quick Capture 保留真实数据 / 原 Inbox 保存。
+- Projects：插画顶部、已有状态筛选与搜索；项目独立轻表面，显示完成结果、有效下一步、领域 / 截止日期、任务完成数和全宽细进度。没有增加虚构的本周专注 / 推進数据。
+- Data：身体与健康、学习、生活、收入四组；每组共享表面，每个指标保持 64px 行，增加低饱和图标和可见“+记录”按钮。保留 7/30 天历史、覆盖天数与不确定顺序说明。睡眠只在显示层换为小时 / 分钟，存储和 Reader 单位仍为分钟。
+- Focus：插画渐隐背景、任务、SVG 计时环、剩余时间、本段计划 / 已用分钟、暂停 / 继续与结束记录。复用当前 focus，不新增历史 session，也不声称可以计算准确的周 Focus 总时长。
+- Calendar：增加现有 date 选择的月历表现，周一列起始、真实 event 日期点、点击日期回到原日安排。原日 / 周 / 月筛选、编辑、删除保持。没有改既有范围统计口径。
+- Inbox：复用 QuickCapture 做页内快记；待整理条数、原记录列表与转任务 / 项目 / 日程 / 归档按钮保留。仍只有原 inbox 数据来源。
+- Daily / Weekly Review：分段周期选择、事实汇总与人工表单分别分组；表单文字、按钮和数值更清晰。Weekly 内的值得注意列表避免卡片套卡片。原保存字段和统计保持。
+- Insights：符号、标题、事实说明、44px 行动按钮与可展开规则形成清晰层级。规则、最多五条与 action route 不变。
+- More / Sheet / Dock：共享奶白表面和紫色操作状态，原四个移动导航和 Add Menu 不变，没有新增一级导航。中间 Add 48px；安全区、滚动、草稿和焦点恢复沿用原实现。
+
+### Token
+
+背景 #F8F6F2；surface #FFFDFB；soft #F4F0EA；accent #8B79C9；strong #6F5AA8；accent-soft #EEE8FA；text #1F2230；muted #6F7482；faint #9AA0AC；border #E7E2DA。健康 #8FAE8A；中优先级 #D8A35D；高优先级 #D97C71；收入 #77A39A；学习 #A18DD8；P4 #B5B8C3。保留暗色暖紫灰主题与 reduced-motion。标题约 28–30px，任务约 16px，主要按钮和输入至少 44px；普通指标不单独建立大卡片。
+
+### 插画素材及生成说明
+
+使用内置 imagegen（不是 CLI / 外部 API）生成独立装饰素材，不把生成图里的文字、按钮当作真实 UI。原始图片保留在 Codex generated_images，项目使用 public/illustrations/windowsill.webp（1200×400，57,028 bytes）。图片以浏览器 Canvas 仅缩放及转码 WebP，图形内容没有重绘。使用 BASE_URL 相对资源路径，兼容 Pages 子目录和 Capacitor assets。
+
+最终生成提示词：
+
+> Use case: illustration-story. Generate a production app header background illustration only, NOT a UI mockup. Wide landscape 3:1 composition. A softly painted warm sunlit windowsill: ivory sheer curtains, quiet distant warm city skyline, small leafy green potted plants, a few books at right, a sleeping calico cat curled on sill in lower right half. Cream white #F8F6F2 and restrained sage greens, subtle lavender hints #8B79C9, warm golden morning light. High-quality calm hand-painted editorial illustration like a refined cozy lifestyle app. Upper left half is light cream negative space with very little detail for dark Chinese UI text overlaid later in code. Cat and plants clear in bottom right. Composition feathered/light toward edges for blending with warm cream page. No people. No lettering, no symbols, no logos, no buttons, no phones, no interface. Avoid bright blue, neon purple, excessive clutter, photorealism.
+
+### 修改文件
+
+- src/fusion.css：共用 token、手机布局 / 表面、按钮与暗色呈现。
+- src/main.jsx：引入新样式；src/ui.jsx：PageHead 可选插画呈现。
+- src/components/HeaderArt.jsx；public/illustrations/windowsill.webp：真实独立插画。
+- src/features/today/Today.jsx；TodaySignals.jsx：顶部呈现和只读摘要。
+- src/features/tasks/TaskComponents.jsx：data-priority 呈现属性。
+- src/features/projects/Projects.jsx：项目标题插画。
+- src/features/trackers/Data.jsx；display.js：图标 / 记录操作和纯显示格式。
+- src/pages/CorePages.jsx；src/features/calendar/CalendarMonth.jsx：专注、收件箱、日历呈现。
+- src/features/insights/InsightList.jsx：事实列表的装饰符号。
+- tests/e2e/fusion.spec.js；mobile-v3.spec.js；tracker-recording.spec.js；trackers.spec.js：真实交互与新显示契约。
+- tests/production/fusion.spec.js：Pages 子路径插画 / 懒加载 / 刷新。
+- docs/V2-IMPLEMENTATION.md：本说明。
+
+### 实际截图和验收
+
+隔离 Chromium Pixel 7 测试上下文、空云配置、示例旧 kind 记录。不会读取或写入用户日常记录。截图不是 imagegen 概念稿：.qa/phase9c/overview.png 汇集 Today、Projects、Data、Focus、Calendar、Inbox、Daily Review、Insights 八个实际首屏。每页还有 *-full.png 长截图，另有 Weekly 和 More 截图。窗口外内容保留正常滚动，没有为了截图隐藏导航或控件。
+
+最终验证：
+
+| 检查 | 结果 |
+| --- | --- |
+| npm test | 78 项通过 |
+| npm run test:e2e -- --workers=2 | 58 项通过，16 项按设备范围跳过，无失败 |
+| npm run test:production | 11 项通过 |
+| npm run build（android:sync 内再次执行） | 通过；入口 JS 524.85kB / gzip 156.09kB，入口 CSS 84.26kB / gzip 17.08kB |
+| npm run android:sync | 通过；四个既有插件与最终 Web assets 同步成功 |
+| git diff --check | 通过 |
+| 实际截图运行 | 10 页，8 页总览，runtime.json 无 pageerror |
+
+回归中修复了旧石墨色 token 的断言、两处睡眠分钟显示的旧断言以及新 Focus 文案中的空格断言；最后全量回归通过。截图审核修复了旧 CSS specificity 使 Next Action 背景 / 白字低对比，以及隐藏 Data 记录文字的问题。新增测试验证图像实际解码、Pages 相对路径、真实月历选日、Focus 当前分钟、Inbox 保存与刷新、旧字段和 source kind 保留、360px 无横向溢出。用户的两份使用说明没有修改。
+
+### 仍待后续验证的边界
+
+- 小米真机输入法、系统安全区、通知点击、覆盖安装与 APK 原生编译未验收；android:sync 仅验证 Web assets 和插件同步。
+- 未连接真实 Supabase 双端做线上写入验证；本轮未改 schema 或 sync 协议。
+- 历史 Focus singleton 和同日身体测量时间缺失仍沿用旧模型限制，不使用视觉改版伪造统计精度。
+- 入口 JS 仍有既有 >500kB 提示，本轮未做范围外的 bundler 改造。
+- 旧页仍保留独有布局，非全站像素级同构；插画当前为静态装饰。本阶段停止于 Phase 9C，发布状态以对应 GitHub Actions 为准。

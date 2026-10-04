@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "../../ui";
+import { Icon, Link } from "../../ui";
 import "./insights.css";
 
 const SOURCE_NAMES = {
@@ -31,6 +31,13 @@ export function InsightList({ items }) {
           data-insight={item.type}
           data-severity={item.severity}
         >
+          <span className="insight-symbol" aria-hidden="true">
+            <Icon
+              name={
+                item.severity === "attention" ? "Target" : "ChartNoAxesCombined"
+              }
+            />
+          </span>
           <h3>{item.title}</h3>
           <p>{item.description}</p>
           <Link className="text-link" to={item.actionRoute}>

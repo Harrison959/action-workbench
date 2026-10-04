@@ -51,7 +51,7 @@ test("Data shares six complete editors, updates immediately and persists origina
   await page.getByLabel("影响因素 / 睡前发生了什么").fill("提前关灯");
   await noOverflow(page);
   await save(page);
-  await expect(metric(page, "sleep.duration")).toHaveText("400 分钟");
+  await expect(metric(page, "sleep.duration")).toHaveText("6小时40分");
   // A second click edits the existing waking date; it must not create a duplicate.
   await record(page, "sleep.duration");
   await expect(page.getByLabel("夜醒时间明细（可选）")).toHaveValue(
@@ -59,7 +59,7 @@ test("Data shares six complete editors, updates immediately and persists origina
   );
   await page.getByLabel("夜间清醒估计总分钟").fill("30");
   await save(page);
-  await expect(metric(page, "sleep.duration")).toHaveText("390 分钟");
+  await expect(metric(page, "sleep.duration")).toHaveText("6小时30分");
 
   await record(page, "body.weight");
   for (const [label, value] of [

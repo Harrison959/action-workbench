@@ -684,3 +684,9 @@ Projects / Data / Review / Insights / Settings / CorePages / Workstreams / Navig
 - 旧 Focus 没有可靠逐次历史，Weekly 继续显示无法精确统计。同日身体旧测量无时间，仍提示实际先后不确定。录音附件仍仅原设备保存，不包含在文字备份／云同步中。
 - Windows 本机 android:sync 验证 assets 和插件；实际 APK 编译须以最终提交的 GitHub Android 工作流为准，不能把 sync 当作 APK 编译。
 - 两份用户原有、未跟踪的中文使用说明保留，不纳入本轮提交；构建产物、QA 临时文件、环境参数不入仓库。
+
+### Step 10：最终用户说明
+
+新增 `docs/USER-GUIDE-MOBILE.md`（32 个主题及安装／更新说明）、`docs/USER-GUIDE-WEB.md`（20 个主题及 Command Center／快捷键）、`docs/QUICK-START.md`（5 分钟上手闭环）。使用 `docs/images/v3/` 中的真实截图，不使用概念图。文字按最终可见按钮和业务表单核对，说明 Focus 进入后需开始／继续、Top 3 限额、复盘不自动生成计划、缺失不补零、登录空间合并、JSON 合并导入、录音不云同步／不在文字备份中，以及浏览器完整离线资源和真机通知的限制。
+
+APK 获取指向匹配提交的 Android Actions artifact；不把旧 Release 称为最终 UI 包，也不承诺没有持久化签名的测试包可以直接覆盖安装。文档本地图片／文件链接检查通过。
